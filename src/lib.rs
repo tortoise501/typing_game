@@ -1,70 +1,10 @@
 extern crate crossterm;
 
-use std::{clone, os::linux::raw::stat};
+mod gameio;
 
-use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyModifiers};
-// use std::{fmt::Error, io::{self, Write}};
 
-fn try_read_key() -> std::io::Result<Option<char>> {
-    // Set terminal to raw mode
 
-    crossterm::terminal::enable_raw_mode()?;
-    let res;
-    loop {
-        // Read next event
-        if let Event::Key(KeyEvent { code, modifiers, kind: _, state: _ }) = read()? {
-            match code {
-                KeyCode::Char(c) => {
-                    if modifiers == KeyModifiers::CONTROL && c == 'c'{
-                        crossterm::terminal::disable_raw_mode()?;//brakes terminal without this line
-                        panic!("Ctrl + C pressed");//TODO: make better termination
-                    }
-                    res =  Ok(Some(c));
-                    break;
-                },
-                _ => {
-                    res = Ok(None);
-                    break;
-                }
-            }
-        }
-    }
-    crossterm::terminal::disable_raw_mode()?;
-    res
-}
-fn read_key() -> Option<char>{
-    let res = try_read_key();
-    match res {
-        Ok(Some(c)) => {
-            return Some(c);
-        },
-        Ok(None) =>{
-            return None;
-        },
-        Err(E) => {
-            panic!("Problem processing input, {}", E)
-        }
-    }
-}
-// fn crossterm_test() -> std::io::Result<()> {
-//     // using the macro
-//     execute!(
-//         stdout(),
-//         SetForegroundColor(Color::Blue),
-//         SetBackgroundColor(Color::Red),
-//         Print("Styled text here."),
-//         ResetColor
-//     )?;
 
-//     // or using functions
-//     stdout()
-//         .execute(SetForegroundColor(Color::Blue))?
-//         .execute(SetBackgroundColor(Color::Red))?
-//         .execute(Print("Styled text here."))?
-//         .execute(ResetColor)?;
-    
-//     Ok(())
-// }
 
 
 pub fn start(){
@@ -76,13 +16,21 @@ fn start_game(){
     let created_text = get_random_test();
     let mut written_text = String::new();
     loop{
-        match read_key(){
+        match gameio::input::read_key(){
             None => (),
             Some(c) => written_text.push_str(c.to_string().as_str()),
         }
+        let matched_text = get_matched_strings(&written_text, &created_text);
+        match gameio::output::print_game_text(&matched_text) {
+            Ok(msg) => _ = msg,
+            Err(msg) => panic!("Error in output function, {}",msg)
+        }
+
     }
 
 }
+
+
 
 fn get_random_test() -> String {
     String::from("Not a random text, only used for testing")
@@ -98,19 +46,12 @@ fn get_matched_strings(written_text:&String, created_text:&String) -> Vec<TypedS
     let mut one_status_string = String::new();
     
     let mut push_new_status_string = |c: &char, status: TextStatus, new: bool| {
-        println!("test");
         if new{
-            println!("before:");
-            println!("{:?}",res);
-            println!("added:");
             let test = TypedString{
                 text_status: status,
                 text: one_status_string.clone(),
             };
-            println!("{:?}",test);
             res.push(test);
-            println!("after:");
-            println!("{:?}",res);
             one_status_string = String::new();
         }
         one_status_string.push(c.clone());
@@ -135,7 +76,7 @@ fn get_matched_strings(written_text:&String, created_text:&String) -> Vec<TypedS
 
     for (i, c1) in written_text.iter().enumerate(){
         let c2 = &created_text[i];
-        if(c1 == c2){
+        if c1 == c2 {
             compare_for(c2,TextStatus::Filled);
         }else{
             compare_for(c2,TextStatus::Wrong);

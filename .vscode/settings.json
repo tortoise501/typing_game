@@ -1,5 +1,22 @@
 {
     "cSpell.words": [
-        "crossterm"
+        "crossterm",
+        "gameio",
+        "herbata",
+        "pierogi"
+    ],
+    "rust-analyzer.linkedProjects": [
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml"
     ]
 }
