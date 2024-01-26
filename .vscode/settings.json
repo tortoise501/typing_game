@@ -3,7 +3,8 @@
         "crossterm",
         "gameio",
         "herbata",
-        "pierogi"
+        "pierogi",
+        "pierogis"
     ],
     "rust-analyzer.linkedProjects": [
         "./Cargo.toml",

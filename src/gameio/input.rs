@@ -18,6 +18,10 @@ fn try_read_key() -> std::io::Result<Option<char>> {
                     res =  Ok(Some(c));
                     break;
                 },
+                KeyCode::Backspace => {
+                    res = Ok(Some('\u{232B}'));
+                    break;
+                },
                 _ => {
                     res = Ok(None);
                     break;
