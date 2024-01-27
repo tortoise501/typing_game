@@ -1,27 +1,10 @@
-use crate::component::*;
-use crossterm::event::KeyCode;
 #[allow(dead_code)]
 #[allow(unused_variables)]
-struct Game {
-    correct_text: Vec<char>,
-    written_vec: Vec<Letter>,
-}
-impl Component for Game {
-    fn init(&mut self) -> std::io::Result<()> {
-        Ok(())   
-    }
-    fn handle_key_events(&mut self, key: KeyCode) -> Action {
-        match key {
-            KeyCode::Char(c) => {
-                self.char_key_pressed(c);
-            },
-            KeyCode::Backspace => {
-                self.backspace_pressed();
-            },
-            _ => ()
-        }
-        Action::Noop
-    }
+#[derive(Clone)]
+#[derive(Debug)]
+pub struct Game {
+    pub correct_text: Vec<char>,
+    pub written_vec: Vec<Letter>,
 }
 
 
@@ -37,9 +20,9 @@ impl Game {
     }
     pub fn char_key_pressed(&mut self,c:char){
         if self.correct_text[self.written_vec.len()] == c {
-            self.written_vec.push(Letter{ c, state: LetterState::Correct });
+            self.written_vec.push(Letter { c, state: LetterState::Correct });
         } else {
-            self.written_vec.push(Letter{ c: self.correct_text[self.written_vec.len()].clone(), state: LetterState::Wrong });
+            self.written_vec.push(Letter { c: self.correct_text[self.written_vec.len()].clone(), state: LetterState::Wrong });
         }
     }
 
@@ -50,39 +33,11 @@ impl Game {
     pub fn get_written_vec(&mut self) -> Vec<Letter>{
         let mut res = self.written_vec.clone();
         for c in &self.correct_text[self.written_vec.len()..]{
-            println!("test:{}",c);
             res.push(Letter{ c:c.clone(), state: LetterState::Unfilled });
         }
         res
     }
 
-    pub fn get_matched_letter_vec(&self,correct_string: &String, written_string: &String) -> &Vec<Letter>{
-        // let mut res: Vec<Letter> = Vec::new();
-        // let correct_string: Vec<char> = correct_string.chars().collect();
-        // let written_string: Vec<char> = written_string.chars().collect();
-    
-        // if written_string.len() > correct_string.len(){
-        //     panic!("written text bigger than correct text");
-        // }
-    
-        
-    
-    
-        // for (i,c) in correct_string.iter().enumerate(){
-        //     if i >= written_string.len(){
-        //         res.push(Letter {c:c.clone(),state:LetterState::Unfilled});
-        //         continue;
-        //     }
-        //     let letter_state: LetterState = match c {
-        //         c if c == &written_string[i] => LetterState::Correct,
-        //         _ => LetterState::Wrong,
-        //     };
-        //     res.push(Letter {c:c.clone(),state:letter_state});
-        // }
-    
-        // res
-        &self.written_vec
-    }
     pub fn get_random_test() -> String {
         String::from("Not a random text, only used for testing")
     }
