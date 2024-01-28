@@ -1,16 +1,9 @@
-#[allow(dead_code)]
-#[allow(unused_variables)]
 #[derive(Clone)]
 #[derive(Debug)]
 pub struct Game {
     pub correct_text: Vec<char>,
     pub written_vec: Vec<Letter>,
 }
-
-
-
-#[allow(dead_code)]
-#[allow(unused_variables)]
 impl Game {
     pub fn new() -> Game{
         Game {
