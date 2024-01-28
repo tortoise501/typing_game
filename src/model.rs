@@ -1,11 +1,11 @@
 use crate::game::Game;
 
+use crate::component;
 
-#[derive(Clone)]
-#[derive(Debug)]
+
+
 pub struct Model {
-    pub game: Game,
-    pub active_view: View,
+    pub active_view: component::ViewType,
     pub running_state: RunningState,
 }
 
@@ -16,9 +16,4 @@ pub enum RunningState {
     #[default]
     Running,
     Done,
-}
-pub enum View {
-    Menu,
-    Game,
-    Statistics,
 }

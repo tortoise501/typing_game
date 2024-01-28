@@ -1,4 +1,5 @@
 use std::io::Result;
+use crossterm::event::KeyCode;
 
 use ratatui::{
     Frame,
@@ -17,21 +18,21 @@ use game::Game;
 use model::Model;
 
 use crate::game::LetterState;
-use crate::model::View;
+use crate::component::{Component, GameComp, MenuComp, ViewType};
+use crate::Message::GameStopped;
 
 mod game;
 mod input;
 mod model;
 mod tui;
-mod view;
+mod component;
 
 
 fn main() -> Result<()> {
     tui::install_panic_hook();
     let mut terminal = tui::init_terminal()?;
     let mut game_model = Model {
-        game: Game::new(),
-        active_view: model::View::Menu,
+        active_view: ViewType::Menu(component::MenuComp),
         running_state: model::RunningState::Running,
     };
     while game_model.running_state == model::RunningState::Running {
@@ -46,14 +47,12 @@ fn main() -> Result<()> {
     Ok(())
 }
 
+//TODO: handle other events than keys
 fn handle_event() -> Result<Option<Message>> {
     match input::read_key() {
-        Some(c) if c == '\u{232B}' => {
-            Ok(Some(Message::PressedBackspace))
-        }
-        Some(c) => {
-            Ok(Some(Message::PressedCharKey(c)))
-        }
+        Some(code) => {
+            Ok(Some(Message::PressedKey(code)))
+        },
         _ => {
             Ok(None)
         }
@@ -61,95 +60,67 @@ fn handle_event() -> Result<Option<Message>> {
 }
 
 enum Message {
-    PressedCharKey(char),
-    PressedBackspace,
+    PressedKey(KeyCode),
+    StartGame,
     StopGame,
-    ResetGame,
+    GameStopped(Option<Game>),
+    QuitView,
     Quit,
+
 }
 
 fn update(model: &mut Model, msg: Message) -> Option<Message> {
 
-    match model.active_view {
-        View::Menu => {}
-        View::Game => {
-            match msg {
-                Message::PressedCharKey(c) => {
-                    model.game.char_key_pressed(c);
-                }
-                Message::PressedBackspace => {
-                    model.game.backspace_pressed();
-                }
-                Message::StopGame => {
-                    model.running_state = model::RunningState::Done;
-                }
-                Message::ResetGame => {
-                    model.game = Game::new();
-                }
-                Message::Quit => {
-                    model.running_state = model::RunningState::Done;
-                }
-            };
+    let answer = match &mut model.active_view {
+        ViewType::Menu(comp) => {
+            comp.handle_message(msg)
         }
-        View::Statistics => {}
+        ViewType::Game(comp) => {
+            comp.handle_message(msg)
+        }
+        ViewType::Statistics(comp) => {
+            comp.handle_message(msg)
+        }
+    };
+    let answer = match answer{
+        Some(a) => a,
+        None => return None,
+    };
+    match answer {
+        Message::StartGame => {
+            model.active_view = ViewType::Game( GameComp {
+                game: Game::new(),
+            });
+            None
+        }
+        Message::StopGame => {
+            Some(
+                match &mut model.active_view {
+                ViewType::Game(comp) => {
+                    GameStopped(Some(comp.game.clone()))
+                },
+                _ => GameStopped(None),
+            })
+        },
+        Message::Quit => {
+            tui::restore_terminal().expect("TODO: panic message");
+            panic!("TODO: better program termination");
+        },
+        _ => None
     }
-
-
-
-    None
 }
 
 
 fn view(model: &mut Model, f: &mut Frame) {
-    match model.active_view {
-        View::Menu => {
-            menu_view(model,f);
+    match &mut model.active_view {
+        ViewType::Menu(comp) => {
+            comp.view(f);
         }
-        View::Game => {
-            game_view(model,f);
+        ViewType::Game(comp) => {
+            comp.view(f);
         }
-        View::Statistics => {}
-    }
-
-
+        ViewType::Statistics(comp) => {
+            comp.view(f);
+        }
+    };
 }
-
-fn game_view(model: &mut Model, f: &mut Frame) {
-    let matched_letter_vec = model.game.get_written_vec();
-
-    let mut text: Vec<Span> = Vec::new();
-    for letter in matched_letter_vec {
-        text.push(
-            Span::styled(
-                format!("{}", letter.c),
-                match letter.state {
-                    LetterState::Unfilled => { Style::new().gray() }
-                    LetterState::Correct => { Style::new().white() }
-                    LetterState::Wrong => { Style::new().red() }
-                },
-            )
-        );
-    }
-    let text: Line = Line::from(text);
-
-    f.render_widget(
-        Paragraph::new(text)
-            .block(Block::new().title("Paragraph").borders(Borders::ALL))
-            .style(Style::new().white().on_black())
-            .alignment(Alignment::Left)
-            .wrap(Wrap { trim: false }),
-        f.size(),
-    );
-}
-
-fn menu_view(model: &mut Model, f: &mut Frame){
-    f.render_widget(
-        Paragraph::new("Press 'Space' to start the game, press 'Esc' to exit the game")
-            .block(Block::new().title("Paragraph").borders(Borders::ALL))
-            .style(Style::new().white().on_black())
-            .alignment(Alignment::Left)
-            .wrap(Wrap { trim: false }),
-        f.size(),
-    );
-}
-
