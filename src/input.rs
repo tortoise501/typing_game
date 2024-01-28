@@ -1,43 +1,35 @@
 
 use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyModifiers};
 
+use std::io::Result;
 
-fn try_read_key() -> std::io::Result<Option<char>> {
+
+fn try_read_key() -> Result<Option<KeyCode>> {
     // Set terminal to raw mode
-    crossterm::terminal::enable_raw_mode()?;
-    let res;
-    loop {
+    let mut res = Ok(None);
         // Read next event
-        if let Event::Key(KeyEvent { code, modifiers, kind: _, state: _ }) = read()? {
-            match code {
-                KeyCode::Char(c) => {
-                    if modifiers == KeyModifiers::CONTROL && c == 'c'{
-                        crossterm::terminal::disable_raw_mode()?;//brakes terminal without this line
-                        panic!("Ctrl + C pressed");//TODO: make better termination
-                    }
-                    res =  Ok(Some(c));
-                    break;
-                },
-                KeyCode::Backspace => {
-                    res = Ok(Some('\u{232B}'));
-                    break;
-                },
-                _ => {
-                    res = Ok(None);
-                    break;
+    if let Event::Key(KeyEvent { code, modifiers, kind: _, state: _ }) = read()? {
+        match code {
+            KeyCode::Char(c) => {
+                if modifiers == KeyModifiers::CONTROL && c == 'c'{
+                    crossterm::terminal::disable_raw_mode()?;//brakes terminal without this line
+                    panic!("error");
                 }
+                res =  Ok(Some(code));
+            },
+            _ => {
+                res = Ok(Some(code));
             }
         }
     }
-    crossterm::terminal::disable_raw_mode()?;
     res
 }
 
-pub fn read_key() -> Option<char>{
+pub fn read_key() -> Option<KeyCode>{
     let res = try_read_key();
     match res {
-        Ok(Some(c)) => {
-            return Some(c);
+        Ok(Some(code)) => {
+            return Some(code);
         },
         Ok(None) =>{
             return None;

@@ -23,6 +23,7 @@ mod game;
 mod input;
 mod model;
 mod tui;
+mod view;
 
 
 fn main() -> Result<()> {
