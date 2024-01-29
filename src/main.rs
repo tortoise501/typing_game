@@ -1,24 +1,13 @@
 use std::io::Result;
 use crossterm::event::KeyCode;
 
-use ratatui::{
-    Frame,
-    layout::Alignment,
-    style::{Style, Stylize},
-    text::{
-        Line,
-        Span,
-    },
-    widgets::{
-        Block, Borders, Paragraph, Wrap,
-    },
-};
+use ratatui::Frame;
 
 use game::Game;
 use model::Model;
 
-use crate::game::LetterState;
-use crate::component::{Component, GameComp, MenuComp, ViewType};
+
+use crate::component::{Component, GameComp, ViewType};
 use crate::Message::GameStopped;
 
 mod game;
@@ -58,7 +47,7 @@ fn handle_event() -> Result<Option<Message>> {
         }
     }
 }
-
+#[allow(dead_code)]
 enum Message {
     PressedKey(KeyCode),
     StartGame,
@@ -71,17 +60,7 @@ enum Message {
 
 fn update(model: &mut Model, msg: Message) -> Option<Message> {
 
-    let answer = match &mut model.active_view {
-        ViewType::Menu(comp) => {
-            comp.handle_message(msg)
-        }
-        ViewType::Game(comp) => {
-            comp.handle_message(msg)
-        }
-        ViewType::Statistics(comp) => {
-            comp.handle_message(msg)
-        }
-    };
+    let answer = model.active_view.handle_message(msg);
     let answer = match answer{
         Some(a) => a,
         None => return None,
@@ -112,15 +91,5 @@ fn update(model: &mut Model, msg: Message) -> Option<Message> {
 
 
 fn view(model: &mut Model, f: &mut Frame) {
-    match &mut model.active_view {
-        ViewType::Menu(comp) => {
-            comp.view(f);
-        }
-        ViewType::Game(comp) => {
-            comp.view(f);
-        }
-        ViewType::Statistics(comp) => {
-            comp.view(f);
-        }
-    };
+    model.active_view.view(f);
 }

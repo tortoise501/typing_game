@@ -13,7 +13,7 @@ fn try_read_key() -> Result<Option<KeyCode>> {
             KeyCode::Char(c) => {
                 if modifiers == KeyModifiers::CONTROL && c == 'c'{
                     crossterm::terminal::disable_raw_mode()?;//brakes terminal without this line
-                    panic!("error");
+                    panic!("Ctrl + C");
                 }
                 res =  Ok(Some(code));
             },

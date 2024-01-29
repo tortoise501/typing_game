@@ -7,18 +7,46 @@ use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use crate::game::{Game, LetterState};
 
 use crate::Message;
-use crate::model::Model;
 
 pub trait Component {
     fn handle_message(&mut self, msg: Message) -> Option<Message>;
 
     fn view(&mut self, f: &mut Frame);
 }
-
+#[allow(dead_code)]
 pub enum ViewType {
     Menu(MenuComp),
     Game(GameComp),
     Statistics(StatComp),
+}
+impl Component for ViewType {
+    fn handle_message(&mut self, msg: Message) -> Option<Message> {
+        match self {
+            ViewType::Menu(comp) => {
+                comp.handle_message(msg)
+            }
+            ViewType::Game(comp) => {
+                comp.handle_message(msg)
+            }
+            ViewType::Statistics(comp) => {
+                comp.handle_message(msg)
+            }
+        }
+    }
+
+    fn view(&mut self, f: &mut Frame) {
+        match self {
+            ViewType::Menu(comp) => {
+                comp.view(f);
+            }
+            ViewType::Game(comp) => {
+                comp.view(f);
+            }
+            ViewType::Statistics(comp) => {
+                comp.view(f);
+            }
+        };
+    }
 }
 
 pub struct MenuComp;
@@ -112,7 +140,8 @@ impl Component for GameComp {
 }
 
 pub struct StatComp;
-
+#[allow(unused_variables)]
+#[allow(dead_code)]
 impl Component for StatComp{
     fn handle_message(&mut self, msg: Message) -> Option<Message>{
         todo!()

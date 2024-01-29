@@ -1,5 +1,3 @@
-use crate::game::Game;
-
 use crate::component;
 
 
@@ -12,6 +10,7 @@ pub struct Model {
 #[derive(Clone)]
 #[derive(Debug, PartialEq, Eq)]
 #[derive(Default)]
+#[allow(dead_code)]
 pub enum RunningState {
     #[default]
     Running,
