@@ -1,4 +1,5 @@
 use std::io::Result;
+use component::{MenuComp, StatComp};
 use crossterm::event::KeyCode;
 
 use ratatui::Frame;
@@ -8,7 +9,7 @@ use model::Model;
 
 
 use crate::component::{Component, GameComp, ViewType};
-use crate::Message::GameStopped;
+// use crate::Message::GameStopped;
 
 mod game;
 mod input;
@@ -47,25 +48,30 @@ fn handle_event() -> Result<Option<Message>> {
         }
     }
 }
-#[allow(dead_code)]
+// #[allow(dead_code)]
+#[derive(Debug)]
 enum Message {
     PressedKey(KeyCode),
     StartGame,
     StopGame,
     GameStopped(Option<Game>),
-    QuitView,
+    GoToView(ViewType),
     Quit,
 
 }
 
 fn update(model: &mut Model, msg: Message) -> Option<Message> {
-
+    // msg = match process_message(model,msg){
+    //     Some(m) => m,
+    //     None => return None
+    // };
     let answer = model.active_view.handle_message(msg);
-    let answer = match answer{
-        Some(a) => a,
-        None => return None,
-    };
-    match answer {
+    process_message(model,answer)
+    
+}
+
+fn process_message(model: &mut Model, msg: Message) -> Option<Message> {
+    match msg {
         Message::StartGame => {
             model.active_view = ViewType::Game( GameComp {
                 game: Game::new(),
@@ -76,18 +82,41 @@ fn update(model: &mut Model, msg: Message) -> Option<Message> {
             Some(
                 match &mut model.active_view {
                 ViewType::Game(comp) => {
-                    GameStopped(Some(comp.game.clone()))
+                    Message::GameStopped(Some(comp.game.clone()))
                 },
-                _ => GameStopped(None),
+                _ => Message::GameStopped(None),
             })
         },
         Message::Quit => {
             tui::restore_terminal().expect("TODO: panic message");
             panic!("TODO: better program termination");
         },
+        Message::GameStopped(game) => {
+            match game {
+                Some(game) => {
+                    if game.is_complete(){
+                        Some(Message::GoToView(
+                            ViewType::Statistics( StatComp {game} )
+                        ))
+                    } else {
+                        Some(Message::GoToView(ViewType::Menu(MenuComp)))
+                    }
+                    
+                },
+                None => {
+                    Some(Message::GoToView(ViewType::Menu(MenuComp)))
+                }
+
+            }
+        },
+        Message::GoToView(view) => {
+            model.active_view = view;
+            None
+        },
         _ => None
     }
 }
+
 
 
 fn view(model: &mut Model, f: &mut Frame) {
