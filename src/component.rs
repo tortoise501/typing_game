@@ -9,18 +9,19 @@ use crate::game::{Game, LetterState};
 use crate::Message;
 
 pub trait Component {
-    fn handle_message(&mut self, msg: Message) -> Option<Message>;
+    fn handle_message(&mut self, msg: Message) -> Message;
 
     fn view(&mut self, f: &mut Frame);
 }
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum ViewType {
     Menu(MenuComp),
     Game(GameComp),
     Statistics(StatComp),
 }
 impl Component for ViewType {
-    fn handle_message(&mut self, msg: Message) -> Option<Message> {
+    fn handle_message(&mut self, msg: Message) -> Message {
         match self {
             ViewType::Menu(comp) => {
                 comp.handle_message(msg)
@@ -48,25 +49,29 @@ impl Component for ViewType {
         };
     }
 }
-
+#[derive(Debug)]
 pub struct MenuComp;
 impl Component for MenuComp {
-    fn handle_message(&mut self, msg: Message) -> Option<Message> {
-        match msg {
+    fn handle_message(&mut self, msg: Message) -> Message {
+        let answer = match msg {
             Message::PressedKey(code) => {
-                return match code {
+                match code {
                     KeyCode::Esc => {
                         Some(Message::Quit)
-                    }
+                    },
                     KeyCode::Char(' ') => {
                         Some(Message::StartGame)
-                    }
+                    },
                     _ => {
                         None
-                    }
-                };
-            }
+                    },
+                }
+            },
             _ => None,
+        };
+        match answer {
+            Some(a) => a,
+            None => msg,
         }
     }
 
@@ -81,20 +86,21 @@ impl Component for MenuComp {
         );
     }
 }
-
+#[derive(Debug)]
 pub struct GameComp {
     pub(crate) game: Game,
 }
 impl Component for GameComp {
-    fn handle_message(&mut self, msg: Message) -> Option<Message> {
-        match msg {
+    fn handle_message(&mut self, msg: Message) -> Message {
+        let answer: Option<Message> = match msg {
             Message::PressedKey(code) => {
-                return match code {
+                match code {
                     KeyCode::Esc => {
                         Some(Message::StopGame)
                     }
                     KeyCode::Char(c) => {
                         self.game.char_key_pressed(c);
+                        if self.game.is_complete() {return Message::StopGame};
                         None
                     },
                     KeyCode::Backspace => {
@@ -104,10 +110,15 @@ impl Component for GameComp {
                     _ => {
                         None
                     }
-                };
-            }
+                }
+            },
             _ => None,
+        };
+        match answer {
+            Some(a) => a,
+            None => msg,
         }
+
     }
 
     fn view(&mut self, f: &mut Frame) {
@@ -138,12 +149,14 @@ impl Component for GameComp {
         );
     }
 }
-
-pub struct StatComp;
+#[derive(Debug)]
+pub struct StatComp {
+    pub game: Game,
+}
 #[allow(unused_variables)]
 #[allow(dead_code)]
 impl Component for StatComp{
-    fn handle_message(&mut self, msg: Message) -> Option<Message>{
+    fn handle_message(&mut self, msg: Message) -> Message {
         todo!()
     }
 

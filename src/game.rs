@@ -19,6 +19,10 @@ impl Game {
         }
     }
 
+    pub fn is_complete(&self) -> bool {
+        self.written_vec.len() == self.correct_text.len()
+    }
+
     pub fn backspace_pressed(&mut self){
         self.written_vec.pop();
     }
