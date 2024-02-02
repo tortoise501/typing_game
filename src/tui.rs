@@ -1,17 +1,16 @@
 use std::io::Result;
 use crossterm::{
-    terminal::{
+    cursor::{MoveTo, SetCursorStyle}, execute, terminal::{
         disable_raw_mode, enable_raw_mode, EnterAlternateScreen,
         LeaveAlternateScreen,
-    },
-    ExecutableCommand,
+    }, ExecutableCommand
 };
 use ratatui::prelude::*;
 use std::{io::stdout, panic};
 
 pub fn init_terminal() -> Result<Terminal<impl Backend>> {
     enable_raw_mode()?;
-    stdout().execute(EnterAlternateScreen)?;
+    execute!(stdout(),EnterAlternateScreen,SetCursorStyle::BlinkingBar,MoveTo(3,3))?;
     let terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
     Ok(terminal)
 }

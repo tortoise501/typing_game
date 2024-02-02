@@ -36,7 +36,7 @@ impl Game {
     }
 
     pub fn get_random_test() -> String {
-        String::from("Not a random text, only used for testing")
+        String::from("Ryan Thomas Gosling is a Canadian actor. Prominent in both independent film and major studio features of varying genres, his films have accrued a worldwide box office gross of over 1.9 billion USD. He has received various accolades, including a Golden Globe Award, as well as nominations for three Academy Awards and two BAFTAs. ")
     }
 }
 

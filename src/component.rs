@@ -125,13 +125,15 @@ impl Component for GameComp {
         let matched_letter_vec = self.game.get_written_vec();
 
         let mut text: Vec<Span> = Vec::new();
+        let mut unfilled_started = false;
         for letter in matched_letter_vec {
             text.push(
                 Span::styled(
                     format!("{}", letter.c),
                     match letter.state {
-                        LetterState::Unfilled => { Style::new().gray() }
-                        LetterState::Correct => { Style::new().white() }
+                        LetterState::Unfilled if !unfilled_started => { unfilled_started = true; Style::new().on_gray().black() },
+                        LetterState::Unfilled  => { Style::new().gray() },
+                        LetterState::Correct => { Style::new().green() }
                         LetterState::Wrong => { Style::new().red() }
                     },
                 )
