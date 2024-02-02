@@ -129,17 +129,18 @@ impl Component for GameComp {
         for letter in matched_letter_vec {
             text.push(
                 Span::styled(
-                    format!("{}", 
-                        match (&letter.c,&letter.state) {
-                            (' ',LetterState::Wrong) => {'\u{00B7}'},
-                            _ => letter.c
-                        }
-                    ),
+                    format!("{}",letter.c),
                     match letter.state {
-                        LetterState::Unfilled if !unfilled_started => { unfilled_started = true; Style::new().on_gray().black() },
-                        LetterState::Unfilled  => { Style::new().gray() },
-                        LetterState::Correct => { Style::new().green() }
-                        LetterState::Wrong => { Style::new().red() }
+                        LetterState::Unfilled if !unfilled_started => { unfilled_started = true; Style::new().on_gray().black().not_underlined() },
+                        LetterState::Unfilled  => { Style::new().gray().not_underlined() },
+                        LetterState::Correct => { Style::new().green().not_underlined() }
+                        LetterState::Wrong => { 
+                            if letter.c == ' ' {
+                                Style::new().red().underlined().underline_color(ratatui::style::Color::Red)
+                            } else {
+                                Style::new().red().not_underlined()
+                            }
+                        }
                     },
                 )
             );
