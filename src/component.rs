@@ -129,7 +129,12 @@ impl Component for GameComp {
         for letter in matched_letter_vec {
             text.push(
                 Span::styled(
-                    format!("{}", letter.c),
+                    format!("{}", 
+                        match (&letter.c,&letter.state) {
+                            (' ',LetterState::Wrong) => {'\u{00B7}'},
+                            _ => letter.c
+                        }
+                    ),
                     match letter.state {
                         LetterState::Unfilled if !unfilled_started => { unfilled_started = true; Style::new().on_gray().black() },
                         LetterState::Unfilled  => { Style::new().gray() },
