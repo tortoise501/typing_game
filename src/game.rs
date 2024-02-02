@@ -7,7 +7,7 @@ pub struct Game {
 impl Game {
     pub fn new() -> Game{
         Game {
-            correct_text: Game::get_random_test().chars().collect(),
+            correct_text: Game::get_random_test(4).chars().collect(),
             written_vec: Vec::new(),
         }
     }
@@ -35,8 +35,15 @@ impl Game {
         res
     }
 
-    pub fn get_random_test() -> String {
-        String::from("Ryan Thomas Gosling is a Canadian actor. Prominent in both independent film and major studio features of varying genres, his films have accrued a worldwide box office gross of over 1.9 billion USD. He has received various accolades, including a Golden Globe Award, as well as nominations for three Academy Awards and two BAFTAs. ")
+    pub fn get_random_test(size:i32) -> String {
+        //String::from("Ryan Thomas Gosling is a Canadian actor. Prominent in both independent film and major studio features of varying genres, his films have accrued a worldwide box office gross of over 1.9 billion USD. He has received various accolades, including a Golden Globe Award, as well as nominations for three Academy Awards and two BAFTAs. ")
+        let mut chain = markov::Chain::new();
+        let er = chain.feed_file("text_for_markov.txt");
+        match er {
+            Ok(_) => (),
+            Err(e) => panic!("{e}"),
+        }
+        String::from_iter(chain.str_iter_for(size as usize))
     }
 }
 
