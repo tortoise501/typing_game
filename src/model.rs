@@ -3,7 +3,7 @@ use crate::component;
 
 
 pub struct Model {
-    pub active_view: component::ViewType,
+    pub active_window: component::WindowType,
     pub running_state: RunningState,
 }
 

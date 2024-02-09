@@ -3,6 +3,8 @@ use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyModifiers};
 
 use std::io::Result;
 
+use crate::Message;
+
 
 fn try_read_key() -> Result<Option<KeyCode>> {
     // Set terminal to raw mode
@@ -12,7 +14,6 @@ fn try_read_key() -> Result<Option<KeyCode>> {
         match code {
             KeyCode::Char(c) => {
                 if modifiers == KeyModifiers::CONTROL && c == 'c'{
-                    crossterm::terminal::disable_raw_mode()?;//brakes terminal without this line
                     panic!("Ctrl + C");
                 }
                 res =  Ok(Some(code));
@@ -25,17 +26,21 @@ fn try_read_key() -> Result<Option<KeyCode>> {
     res
 }
 
-pub fn read_key() -> Option<KeyCode>{
+pub fn get_input_message() -> Option<Message>{
     let res = try_read_key();
     match res {
         Ok(Some(code)) => {
-            return Some(code);
+            Some(Message::PressedKey(code))
         },
         Ok(None) =>{
-            return None;
+            None
         },
         Err(e) => {
-            panic!("Problem processing input, {}", e)
+            if e.to_string() == "Ctrl + c" {
+                Some(Message::Quit)
+            } else {
+                panic!("Error during input processing: {} ",e)
+            }
         }
     }
 }
