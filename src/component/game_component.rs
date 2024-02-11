@@ -39,13 +39,13 @@ impl Component for GameComp {
             text.push(Span::styled(
                 format!("{}", letter.c),
                 match letter.state {
-                    LetterState::Unfilled if !unfilled_started => {
+                    FieldState::Unfilled if !unfilled_started => {
                         unfilled_started = true;
                         Style::new().on_gray().black().not_underlined()
                     }
-                    LetterState::Unfilled => Style::new().gray().not_underlined(),
-                    LetterState::Correct => Style::new().green().not_underlined(),
-                    LetterState::Wrong => {
+                    FieldState::Unfilled => Style::new().gray().not_underlined(),
+                    FieldState::Correct => Style::new().green().not_underlined(),
+                    FieldState::Wrong => {
                         if letter.c == ' ' {
                             Style::new()
                                 .red()

@@ -1,4 +1,4 @@
-use crate::game::{Game, LetterState};
+use crate::game::{FieldState, Game};
 use crossterm::event::KeyCode;
 use ratatui::layout::Alignment;
 use ratatui::prelude::{Line, Span, Style};

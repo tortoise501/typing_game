@@ -30,7 +30,7 @@ impl Component for StatComp {
                 self.game
                     .written_vec
                     .iter()
-                    .filter(|letter| { letter.state == LetterState::Wrong })
+                    .filter(|letter| { letter.state == FieldState::Wrong })
                     .count()
             ))
             .block(Block::new().title("Paragraph").borders(Borders::ALL))
