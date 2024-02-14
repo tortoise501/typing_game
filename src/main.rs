@@ -12,6 +12,7 @@ use crate::component::{Component, GameComp, MenuComp, StatComp, WindowType};
 mod component;
 mod game;
 mod input;
+mod markov_gen;
 mod model;
 mod tui;
 
@@ -52,7 +53,9 @@ fn update(model: &mut Model, msg: Message) -> Option<Message> {
 fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
     match answer {
         Message::StartGame => {
-            model.active_window = WindowType::Game(GameComp { game: Game::new() });
+            model.active_window = WindowType::Game(GameComp {
+                game: Game::new(100),
+            });
             None
         }
         Message::StopGame => Some(match &mut model.active_window {

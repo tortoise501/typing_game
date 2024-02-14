@@ -1,4 +1,4 @@
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 
 #[derive(Clone, Debug)]
 pub struct Game {
@@ -7,9 +7,9 @@ pub struct Game {
     pub statistics: GameStat,
 }
 impl Game {
-    pub fn new() -> Game {
+    pub fn new(size: usize) -> Game {
         Game {
-            correct_text: Game::get_random_text(5).chars().collect(),
+            correct_text: Game::get_random_text(size).chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
         }
@@ -22,11 +22,32 @@ impl Game {
                 c,
                 state: FieldState::Correct,
             });
+            self.statistics.correct_strokes += 1;
         } else {
             self.written_vec.push(Letter {
                 c: self.correct_text[self.written_vec.len()].clone(),
                 state: FieldState::Wrong,
             });
+            self.statistics.wrong_strokes += 1;
+        }
+
+        //section for speed tracking (probably not very optimized)
+
+        if c != ' ' {
+            return; //checking if it is the end of potential word
+        }
+        let correct_words = self.get_correct_words_count();
+        let track_interval = 5; //track every 5 words //TODO: make it customizable
+
+        if correct_words % track_interval == 0
+            && correct_words > self.statistics.speed_stat.len() as u32 * track_interval
+        {
+            let time_passed = SystemTime::now()
+                .duration_since(self.statistics.time_started.clone())
+                .expect("idk some error with time calculations");
+            self.statistics
+                .speed_stat
+                .push(GameStat::calculate_speed(correct_words, time_passed).round() as u32);
         }
     }
 
@@ -35,9 +56,12 @@ impl Game {
         self.written_vec.len() == self.correct_text.len()
     }
 
-    /// "Press" backspace for written text, doesn't allow to delete letters of correctly finished word
+    /// "Press" backspace for written text, deletes 1 correct stroke if letter is correct //TODO?:doesn't allow to delete letters of correctly finished word
     pub fn backspace_pressed(&mut self) {
-        self.written_vec.pop();
+        let letter = self.written_vec.pop();
+        if letter.is_some() && letter.unwrap().state == FieldState::Correct {
+            self.statistics.correct_strokes -= 1; //needed to
+        }
     }
 
     /// Gets vector of letters including unfilled letters from correct text
@@ -57,20 +81,14 @@ impl Game {
 
     ///Gets random text for a game
     pub fn get_random_text(size: usize) -> String {
-        //String::from("Ryan Thomas Gosling is a Canadian actor. Prominent in both independent film and major studio features of varying genres, his films have accrued a worldwide box office gross of over 1.9 billion USD. He has received various accolades, including a Golden Globe Award, as well as nominations for three Academy Awards and two BAFTAs. ")
-        let mut chain = markov::Chain::new();
-        let er = chain.feed_file("text_for_markov.txt");
-        match er {
-            Ok(_) => (),
-            Err(e) => panic!("{e}"),
-        }
-        let a = &chain.generate_str()[..size];
-        String::from(a)
+        crate::markov_gen::generate(size)
     }
 
     /// Returns game statistics
     pub fn get_statistics(&mut self) -> GameStat {
         self.statistics = GameStat {
+            correct_strokes: self.statistics.correct_strokes.clone(),
+            wrong_strokes: self.statistics.wrong_strokes.clone(),
             wrong_letters: self
                 .written_vec
                 .iter()
@@ -118,16 +136,20 @@ impl Game {
 }
 #[derive(Clone, Debug)]
 pub struct GameStat {
-    wrong_letters: u32,
-    correct_words: u32,
-    speed_stat: Vec<u32>,
-    total_words: u32,
-    time_started: SystemTime,
-    time_finished: SystemTime,
+    pub correct_strokes: u32,
+    pub wrong_strokes: u32,
+    pub wrong_letters: u32,
+    pub correct_words: u32,
+    pub speed_stat: Vec<u32>,
+    pub total_words: u32,
+    pub time_started: SystemTime,
+    pub time_finished: SystemTime,
 }
 impl GameStat {
     pub fn new() -> GameStat {
         GameStat {
+            correct_strokes: 0,
+            wrong_strokes: 0,
             wrong_letters: 0,
             correct_words: 0,
             speed_stat: vec![],
@@ -135,6 +157,12 @@ impl GameStat {
             time_started: SystemTime::now(),
             time_finished: SystemTime::now(),
         }
+    }
+
+    ///gets word count and duration to calculate speed in words per minute
+    pub fn calculate_speed(word_count: u32, delta_time: Duration) -> f32 {
+        let mins = delta_time.as_secs_f32() / 60.0;
+        word_count as f32 / mins
     }
 }
 
@@ -294,7 +322,7 @@ mod test {
     #[ignore = "makes thread sleepy -_- zzz"]
     #[test]
     fn get_time_test() {
-        let mut test_game = Game::new();
+        let mut test_game = Game::new(90);
         let pass_dur = Duration::new(2, 0);
         sleep(pass_dur);
 
