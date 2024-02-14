@@ -15,28 +15,15 @@ pub fn generate(len: usize) -> String {
     .collect();
     markov.add_to_corpus(data);
 
-    // Define a results filter
-    // markov
-    //     .set_filter(|r| {
-    //         // A minimal relative score and number of references
-    //         // The thresholds are relative to your input
-    //         r.score > 5 && r.refs.len() > 2
-    //         // We want to generate random tweets
-    //         && r.text.len() <= 280000
-    //         // No mentions
-    //         && !r.text.contains("@")
-    //         // No urls
-    //         && !r.text.contains("http")
-    //     })
-    //     .set_max_tries(100);
+    let mut res = String::new();
 
-    let result: MarkovResult = markov.generate().expect("err");
-    result
-        .text
-        .as_str()
+    while res.as_str().split(' ').count() < len {
+        res.push_str(markov.generate().expect("err").text.as_str());
+    }
+    res.as_str()
         .split(' ')
         .into_iter()
         .map(|x| x.to_string())
-        .collect::<Vec<String>>()
+        .collect::<Vec<String>>()[..len]
         .join(" ")
 }
