@@ -67,7 +67,7 @@ impl Game {
     pub fn backspace_pressed(&mut self) {
         let letter = self.written_vec.pop();
         if letter.is_some() && letter.unwrap().state == FieldState::Correct {
-            self.statistics.correct_strokes -= 1; //needed to
+            self.statistics.correct_strokes -= 1; //needed to prevent abusive deleting and placing same letters for higher accuracy
         }
     }
 
@@ -187,7 +187,7 @@ pub enum FieldState {
 
 #[cfg(test)]
 mod test {
-    use std::{os::linux::raw::stat, thread::sleep, time::Duration};
+    use std::{thread::sleep, time::Duration};
 
     use super::*;
     #[test]

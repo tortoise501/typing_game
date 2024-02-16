@@ -1,7 +1,5 @@
 use super::*;
 
-use crate::game::GameStat;
-
 #[derive(Debug)]
 pub struct StatComp {
     pub game: Game,
@@ -42,7 +40,7 @@ impl Component for StatComp {
         //     f.size(),
         // );
 
-        let stats = &self.game.statistics;
+        let stats = &self.game.get_statistics();
         f.render_widget(
             Paragraph::new(format!(
                 "Your total speed was: {} wpm.\n At the end of the test you had {} words written wrong.\nYour accuracy is {:.2}.\nImagine this is a graph (WIP): {:?}\nPress 'Enter' to go to menu or 'Esc' to exit the game.\n debugging{:?}",

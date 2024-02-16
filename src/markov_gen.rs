@@ -4,7 +4,7 @@ pub fn generate(len: usize) -> String {
     let mut markov = Markov::new();
 
     // Optional: specify a state size
-    markov.set_state_size(1); // Default: 2
+    markov.set_state_size(1).expect("idk error"); // Default: 2
 
     // Feed it data
     let data: Vec<InputData> = vec![fs::read_to_string("text_for_markov.txt")

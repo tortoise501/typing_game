@@ -1,4 +1,4 @@
-use ratatui::layout::{self, Constraint, Direction, Layout};
+use ratatui::layout::{Constraint, Direction, Layout};
 
 use super::*;
 
