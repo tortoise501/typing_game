@@ -20,7 +20,7 @@ fn main() -> Result<()> {
     tui::install_panic_hook();
     let mut terminal = tui::init_terminal()?;
     let mut game_model = Model {
-        active_window: WindowType::Menu(MenuComp),
+        active_window: WindowType::Menu(MenuComp::new()),
         running_state: model::RunningState::Running,
     };
     while game_model.running_state == model::RunningState::Running {
@@ -73,10 +73,10 @@ fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
                         game,
                     })))
                 } else {
-                    Some(Message::GoToWindow(WindowType::Menu(MenuComp)))
+                    Some(Message::GoToWindow(WindowType::Menu(MenuComp::new())))
                 }
             }
-            None => Some(Message::GoToWindow(WindowType::Menu(MenuComp))),
+            None => Some(Message::GoToWindow(WindowType::Menu(MenuComp::new()))),
         },
         Message::GoToWindow(window) => {
             model.active_window = window;

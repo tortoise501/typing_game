@@ -13,7 +13,7 @@ impl Component for StatComp {
         let answer = match msg {
             Message::PressedKey(code) => match code {
                 KeyCode::Esc => Some(Message::Quit),
-                KeyCode::Enter => Some(Message::GoToWindow(WindowType::Menu(MenuComp))),
+                KeyCode::Enter => Some(Message::GoToWindow(WindowType::Menu(MenuComp::new()))),
                 _ => None,
             },
             _ => None,
