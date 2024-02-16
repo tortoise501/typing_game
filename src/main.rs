@@ -38,7 +38,7 @@ fn main() -> Result<()> {
 #[derive(Debug)]
 enum Message {
     PressedKey(KeyCode),
-    StartGame,
+    StartGame(game::GameMode),
     StopGame,
     GameStopped(Option<Game>),
     GoToWindow(WindowType),
@@ -52,9 +52,9 @@ fn update(model: &mut Model, msg: Message) -> Option<Message> {
 
 fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
     match answer {
-        Message::StartGame => {
+        Message::StartGame(mode) => {
             model.active_window = WindowType::Game(GameComp {
-                game: Game::new(100),
+                game: Game::new(100, mode),
             });
             None
         }

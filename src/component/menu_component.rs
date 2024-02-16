@@ -1,3 +1,5 @@
+use crate::game;
+
 use super::*;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
@@ -51,8 +53,8 @@ impl Component for MenuComp {
             Message::PressedKey(code) => match code {
                 // KeyCode::Esc => Some(Message::Quit),
                 KeyCode::Char(' ') | KeyCode::Enter => match self.current_opt {
-                    MenuOptions::StartNormal => Some(Message::StartGame),
-                    MenuOptions::StartRewrite => Some(Message::StartGame),
+                    MenuOptions::StartNormal => Some(Message::StartGame(game::GameMode::Normal)),
+                    MenuOptions::StartRewrite => Some(Message::StartGame(game::GameMode::Rewrite)),
                     MenuOptions::ExitProgram => Some(Message::Quit),
                 },
                 KeyCode::Down => {
@@ -108,7 +110,7 @@ impl Component for MenuComp {
                         .borders(Borders::ALL)
                         .padding(Padding::vertical(3)),
                 )
-                .alignment(Alignment::Right)
+                .alignment(Alignment::Center)
                 .style(Style::new().white().on_black())
                 .bold()
                 .wrap(Wrap { trim: false }),

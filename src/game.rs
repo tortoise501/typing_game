@@ -1,17 +1,24 @@
 use std::time::{Duration, SystemTime};
 
 #[derive(Clone, Debug)]
+pub enum GameMode {
+    Normal,
+    Rewrite,
+}
+#[derive(Clone, Debug)]
 pub struct Game {
     pub correct_text: Vec<char>,
     pub written_vec: Vec<Letter>,
     pub statistics: GameStat,
+    pub game_mode: GameMode,
 }
 impl Game {
-    pub fn new(size: usize) -> Game {
+    pub fn new(size: usize, mode: GameMode) -> Game {
         Game {
             correct_text: Game::get_random_text(size).chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
+            game_mode: mode,
         }
     }
 
@@ -189,6 +196,7 @@ mod test {
             correct_text: "ccccc".chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
+            game_mode: GameMode::Normal,
         };
         let written_text: Vec<char> = "ccccc".chars().collect();
         for c in written_text {
@@ -225,6 +233,7 @@ mod test {
             correct_text: "wwwww".chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
+            game_mode: GameMode::Normal,
         };
         let written_text: Vec<char> = "-----".chars().collect();
         for c in written_text {
@@ -261,6 +270,7 @@ mod test {
             correct_text: "ccwcu".chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
+            game_mode: GameMode::Normal,
         };
         let written_text: Vec<char> = "cc-c".chars().collect();
         for c in written_text {
@@ -297,6 +307,7 @@ mod test {
             correct_text: "cc cc cc cc".chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
+            game_mode: GameMode::Normal,
         };
         let written_text: Vec<char> = "ccuuc cc cc".chars().collect();
         for c in written_text {
@@ -311,6 +322,7 @@ mod test {
             correct_text: "cc cc cc cc".chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
+            game_mode: GameMode::Normal,
         };
         let written_text: Vec<char> = "ccuuc cc cc".chars().collect();
         for c in written_text {
@@ -322,7 +334,7 @@ mod test {
     #[ignore = "makes thread sleepy -_- zzz"]
     #[test]
     fn get_time_test() {
-        let mut test_game = Game::new(90);
+        let mut test_game = Game::new(90, GameMode::Normal);
         let pass_dur = Duration::new(2, 0);
         sleep(pass_dur);
 
