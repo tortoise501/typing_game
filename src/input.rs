@@ -1,4 +1,4 @@
-use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 use std::io::Result;
 
@@ -11,10 +11,13 @@ fn try_read_key() -> Result<Option<KeyCode>> {
     if let Event::Key(KeyEvent {
         code,
         modifiers,
-        kind: _,
+        kind,
         state: _,
     }) = read()?
     {
+        if kind != KeyEventKind::Press{
+            return Ok(None);
+        }
         match code {
             KeyCode::Char(c) => {
                 if modifiers == KeyModifiers::CONTROL && c == 'c' {
