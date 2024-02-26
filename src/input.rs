@@ -1,43 +1,50 @@
 use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
-use std::io::Result;
+use std::{io::Result, process::exit};
 
 use crate::Message;
 
-fn try_read_key() -> Result<Option<KeyCode>> {
+fn try_read_key() -> Result<Option<InputSignal>> {
     // Set terminal to raw mode
-    let mut res = Ok(None);
+    // let mut res = Ok(None);
     // Read next event
-    if let Event::Key(KeyEvent {
-        code,
-        modifiers,
-        kind,
-        state: _,
-    }) = read()?
-    {
-        if kind != KeyEventKind::Press{
+    if let Event::Key(key) = read()? {
+        if key.kind != KeyEventKind::Press {
             return Ok(None);
         }
-        match code {
+        match key.code {
             KeyCode::Char(c) => {
-                if modifiers == KeyModifiers::CONTROL && c == 'c' {
-                    panic!("Ctrl + C");
+                if key.modifiers == KeyModifiers::CONTROL && c == 'c' {
+                    return Ok(Some(InputSignal::TerminateProgram));
                 }
-                if modifiers == KeyModifiers::CONTROL && (c == 'w' || c == 'h') {
-                    res = Ok(Some(KeyCode::Backspace));
+                if key.modifiers == KeyModifiers::CONTROL && (c == 'w' || c == 'h') {
+                    return Ok(Some(InputSignal::Key(KeyEvent {
+                        code: KeyCode::Backspace,
+                        modifiers: key.modifiers,
+                        kind: key.kind,
+                        state: key.state,
+                    })));
                 } else {
-                    res = Ok(Some(code));
+                    return Ok(Some(InputSignal::Key(key)));
                 }
             }
             _ => {
-                res = Ok(Some(code));
+                return Ok(Some(InputSignal::Key(key)));
             }
         }
     }
-    res
+    Ok(None)
 }
-
-pub fn get_input_message() -> Option<Message> {
+pub fn get_input_process_input() -> Option<InputSignal> {
+    match try_read_key() {
+        Ok(key) => key,
+        Err(emsg) => {
+            eprintln!("problem occurred during input processing\n{}", emsg);
+            exit(0);
+        }
+    }
+}
+/* pub fn get_input_message() -> Option<Message> {
     let res = try_read_key();
     match res {
         Ok(Some(code)) => Some(Message::PressedKey(code)),
@@ -50,4 +57,9 @@ pub fn get_input_message() -> Option<Message> {
             }
         }
     }
+} */
+#[derive(Debug)]
+pub enum InputSignal {
+    Key(KeyEvent),
+    TerminateProgram,
 }

@@ -50,7 +50,7 @@ impl MenuComp {
 impl Component for MenuComp {
     fn handle_message(&mut self, msg: Message) -> Message {
         let answer = match msg {
-            Message::PressedKey(code) => match code {
+            Message::KeyInput(key) => match key.code {
                 // KeyCode::Esc => Some(Message::Quit),
                 KeyCode::Char(' ') | KeyCode::Enter => match self.current_opt {
                     MenuOptions::StartNormal => Some(Message::StartGame(game::GameMode::Normal)),

@@ -9,7 +9,7 @@ pub struct StatComp {
 impl Component for StatComp {
     fn handle_message(&mut self, msg: Message) -> Message {
         let answer = match msg {
-            Message::PressedKey(code) => match code {
+            Message::KeyInput(key) => match key.code {
                 KeyCode::Esc => Some(Message::Quit),
                 KeyCode::Enter => Some(Message::GoToWindow(WindowType::Menu(MenuComp::new()))),
                 _ => None,

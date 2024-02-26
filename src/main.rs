@@ -1,5 +1,6 @@
-use crossterm::event::KeyCode;
-use std::io::Result;
+use crossterm::event::{KeyCode, KeyEvent};
+use input::InputSignal;
+use std::{io::Result, process::exit};
 
 use ratatui::Frame;
 
@@ -26,7 +27,15 @@ fn main() -> Result<()> {
     while game_model.running_state == model::RunningState::Running {
         terminal.draw(|f| view(&mut game_model, f))?;
 
-        let mut current_msg = input::get_input_message();
+        // let input = input::get_input_process_input();
+        let mut current_msg = match input::get_input_process_input() {
+            Some(s) => match s {
+                InputSignal::Key(key) => Some(Message::KeyInput(key)),
+                InputSignal::TerminateProgram => exit(0), //TODO: better program termination
+            },
+            None => None,
+        };
+
         while current_msg.is_some() {
             current_msg = update(&mut game_model, current_msg.unwrap());
         }
@@ -37,7 +46,7 @@ fn main() -> Result<()> {
 // #[allow(dead_code)]
 #[derive(Debug)]
 enum Message {
-    PressedKey(KeyCode),
+    KeyInput(KeyEvent),
     StartGame(game::GameMode),
     StopGame,
     GameStopped(Option<Game>),

@@ -1,4 +1,7 @@
+use crossterm::event::KeyModifiers;
 use ratatui::layout::{Constraint, Direction, Layout};
+
+use crate::game::Letter;
 
 use super::*;
 
@@ -9,7 +12,7 @@ pub struct GameComp {
 impl Component for GameComp {
     fn handle_message(&mut self, msg: Message) -> Message {
         let answer: Option<Message> = match msg {
-            Message::PressedKey(code) => match code {
+            Message::KeyInput(key) => match key.code {
                 KeyCode::Esc => Some(Message::StopGame),
                 KeyCode::Char(c) => {
                     self.game.char_key_pressed(c);
@@ -19,7 +22,15 @@ impl Component for GameComp {
                     None
                 }
                 KeyCode::Backspace => {
-                    self.game.backspace_pressed();
+                    match key.modifiers {
+                        KeyModifiers::CONTROL => {
+                            //TODO:Make it a function in game struct
+                            while self.game.written_vec.last().is_some_and(|l| l.c != ' ') {
+                                self.game.backspace_pressed();
+                            }
+                        }
+                        _ => self.game.backspace_pressed(),
+                    }
                     None
                 }
                 _ => None,
