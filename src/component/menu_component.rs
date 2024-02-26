@@ -106,7 +106,7 @@ impl Component for MenuComp {
             Paragraph::new(lines)
                 .block(
                     Block::new()
-                        .title("Paragraph")
+                        .title("Menu")
                         .borders(Borders::ALL)
                         .padding(Padding::vertical(3)),
                 )

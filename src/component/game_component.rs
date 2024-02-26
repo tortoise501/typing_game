@@ -83,7 +83,7 @@ impl GameComp {
 
         f.render_widget(
             Paragraph::new(text)
-                .block(Block::new().title("Paragraph").borders(Borders::ALL))
+                .block(Block::new().title("Write this text").borders(Borders::ALL))
                 .style(Style::new().white().on_black())
                 .alignment(Alignment::Left)
                 .wrap(Wrap { trim: false }),
@@ -128,7 +128,7 @@ impl GameComp {
 
         f.render_widget(
             Paragraph::new(text)
-                .block(Block::new().title("Paragraph").borders(Borders::ALL))
+                .block(Block::new().title("You type here").borders(Borders::ALL))
                 .style(Style::new().white().on_black())
                 .alignment(Alignment::Left)
                 .wrap(Wrap { trim: false }),
@@ -143,7 +143,11 @@ impl GameComp {
                     .collect::<Vec<String>>()
                     .concat(),
             )
-            .block(Block::new().title("Paragraph").borders(Borders::ALL))
+            .block(
+                Block::new()
+                    .title("Rewrite this text")
+                    .borders(Borders::ALL),
+            )
             .style(Style::new().white().on_black())
             .alignment(Alignment::Left)
             .wrap(Wrap { trim: false }),
