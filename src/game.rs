@@ -1,5 +1,7 @@
 use std::time::{Duration, SystemTime};
 
+use ratatui::symbols::braille;
+
 #[derive(Clone, Debug)]
 pub enum GameMode {
     Normal,
@@ -64,10 +66,25 @@ impl Game {
     }
 
     /// "Press" backspace for written text, deletes 1 correct stroke if letter is correct //TODO?:doesn't allow to delete letters of correctly finished word
-    pub fn backspace_pressed(&mut self) {
+    pub fn clear_last_letter(&mut self) {
         let letter = self.written_vec.pop();
         if letter.is_some() && letter.unwrap().state == FieldState::Correct {
             self.statistics.correct_strokes -= 1; //needed to prevent abusive deleting and placing same letters for higher accuracy
+        }
+    }
+    pub fn clear_last_world(&mut self) {
+        loop {
+            self.clear_last_letter();
+            if self
+                .written_vec
+                .last()
+                .is_some_and(|l| l.c != ' ' && l.state == FieldState::Correct)
+            {
+                break;
+            }
+            if !self.written_vec.last().is_some() {
+                break;
+            }
         }
     }
 

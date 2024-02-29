@@ -63,7 +63,7 @@ fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
     match answer {
         Message::StartGame(mode) => {
             model.active_window = WindowType::Game(GameComp {
-                game: Game::new(100, mode),
+                game: Game::new(20, mode),
             });
             None
         }

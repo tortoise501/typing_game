@@ -26,10 +26,11 @@ impl Component for GameComp {
                         KeyModifiers::CONTROL => {
                             //TODO:Make it a function in game struct
                             while self.game.written_vec.last().is_some_and(|l| l.c != ' ') {
-                                self.game.backspace_pressed();
+                                self.game.clear_last_letter();
                             }
+                            self.game.clear_last_world()
                         }
-                        _ => self.game.backspace_pressed(),
+                        _ => self.game.clear_last_letter(),
                     }
                     None
                 }
