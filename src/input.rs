@@ -2,8 +2,6 @@ use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifier
 
 use std::{io::Result, process::exit};
 
-use crate::Message;
-
 fn try_read_key() -> Result<Option<InputSignal>> {
     // Set terminal to raw mode
     // let mut res = Ok(None);

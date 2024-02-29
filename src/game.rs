@@ -1,7 +1,5 @@
 use std::time::{Duration, SystemTime};
 
-use ratatui::symbols::braille;
-
 #[derive(Clone, Debug)]
 pub enum GameMode {
     Normal,

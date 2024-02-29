@@ -1,4 +1,4 @@
-use crossterm::event::{KeyCode, KeyEvent};
+use crossterm::event::KeyEvent;
 use input::InputSignal;
 use std::{io::Result, process::exit};
 
@@ -31,7 +31,10 @@ fn main() -> Result<()> {
         let mut current_msg = match input::get_input_process_input() {
             Some(s) => match s {
                 InputSignal::Key(key) => Some(Message::KeyInput(key)),
-                InputSignal::TerminateProgram => exit(0), //TODO: better program termination
+                InputSignal::TerminateProgram => {
+                    tui::restore_terminal()?;
+                    exit(0)
+                } //TODO: better program termination
             },
             None => None,
         };

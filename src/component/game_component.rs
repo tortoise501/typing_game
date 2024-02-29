@@ -1,8 +1,6 @@
 use crossterm::event::KeyModifiers;
 use ratatui::layout::{Constraint, Direction, Layout};
 
-use crate::game::Letter;
-
 use super::*;
 
 #[derive(Debug)]
@@ -23,13 +21,7 @@ impl Component for GameComp {
                 }
                 KeyCode::Backspace => {
                     match key.modifiers {
-                        KeyModifiers::CONTROL => {
-                            //TODO:Make it a function in game struct
-                            while self.game.written_vec.last().is_some_and(|l| l.c != ' ') {
-                                self.game.clear_last_letter();
-                            }
-                            self.game.clear_last_world()
-                        }
+                        KeyModifiers::CONTROL => self.game.clear_last_world(),
                         _ => self.game.clear_last_letter(),
                     }
                     None
