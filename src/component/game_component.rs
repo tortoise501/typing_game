@@ -74,13 +74,31 @@ impl GameComp {
         }
         let text: Line = Line::from(text);
 
+        let outer_layout_v = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length((f.size().height - 5) / 2),
+                Constraint::Length(5),
+                Constraint::Length((f.size().height - 5) / 2),
+            ])
+            .split(f.size());
+        let outer_layout_h = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Length(1),
+                Constraint::Length(f.size().width - 3),
+                Constraint::Length(1),
+            ])
+            .split(outer_layout_v[1]);
+        f.render_widget(Block::new().title("Border").borders(Borders::ALL), f.size());
+
         f.render_widget(
             Paragraph::new(text)
-                .block(Block::new().title("Write this text").borders(Borders::ALL))
+                .block(Block::new().borders(Borders::ALL))
                 .style(Style::new().white().on_black())
                 .alignment(Alignment::Left)
                 .wrap(Wrap { trim: false }),
-            f.size(),
+            outer_layout_h[1],
         );
     }
     fn rewrite_view(&mut self, f: &mut Frame) {
