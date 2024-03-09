@@ -29,26 +29,37 @@ pub enum WindowType {
     Game(GameComp),
     Statistics(StatComp),
 }
+impl WindowType {
+    pub fn get_as_comp(&mut self) -> &mut dyn Component {
+        match self {
+            WindowType::Menu(comp) => comp,
+            WindowType::Game(comp) => comp,
+            WindowType::Statistics(comp) => comp,
+        }
+    }
+}
 impl Component for WindowType {
     fn handle_message(&mut self, msg: Message) -> Message {
-        match self {
-            WindowType::Menu(comp) => comp.handle_message(msg),
-            WindowType::Game(comp) => comp.handle_message(msg),
-            WindowType::Statistics(comp) => comp.handle_message(msg),
-        }
+        // match self {
+        //     WindowType::Menu(comp) => comp.handle_message(msg),
+        //     WindowType::Game(comp) => comp.handle_message(msg),
+        //     WindowType::Statistics(comp) => comp.handle_message(msg),
+        // }
+        self.get_as_comp().handle_message(msg)
     }
 
     fn view(&mut self, f: &mut Frame) {
-        match self {
-            WindowType::Menu(comp) => {
-                comp.view(f);
-            }
-            WindowType::Game(comp) => {
-                comp.view(f);
-            }
-            WindowType::Statistics(comp) => {
-                comp.view(f);
-            }
-        };
+        // match self {
+        //     WindowType::Menu(comp) => {
+        //         comp.view(f);
+        //     }
+        //     WindowType::Game(comp) => {
+        //         comp.view(f);
+        //     }
+        //     WindowType::Statistics(comp) => {
+        //         comp.view(f);
+        //     }
+        // };
+        self.get_as_comp().view(f)
     }
 }
