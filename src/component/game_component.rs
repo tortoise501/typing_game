@@ -74,31 +74,37 @@ impl GameComp {
         }
         let text: Line = Line::from(text);
 
-        let outer_layout_v = Layout::default()
+
+        let write_field_rows = 5;//height of field where text is displayed //TODO: make it changeable in game settings
+
+        //layout that divides screen on top, center and bottom rows
+        let y_center_layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                Constraint::Length((f.size().height - 5) / 2),
-                Constraint::Length(5),
-                Constraint::Length((f.size().height - 5) / 2),
+                Constraint::Length((f.size().height - (write_field_rows + 2)) / 2),
+                Constraint::Length(write_field_rows + 2),
+                Constraint::Length((f.size().height - (write_field_rows + 2)) / 2),
             ])
             .split(f.size());
-        let outer_layout_h = Layout::default()
+        //fully centered layout
+        let centered_layout = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([
                 Constraint::Length(1),
                 Constraint::Length(f.size().width - 3),
                 Constraint::Length(1),
             ])
-            .split(outer_layout_v[1]);
-        f.render_widget(Block::new().title("Border").borders(Borders::ALL), f.size());
+            .split(y_center_layout[1]);
 
+
+        f.render_widget(Block::new().title("Border").borders(Borders::ALL), f.size());
         f.render_widget(
             Paragraph::new(text)
                 .block(Block::new().borders(Borders::ALL))
                 .style(Style::new().white().on_black())
                 .alignment(Alignment::Left)
                 .wrap(Wrap { trim: false }),
-            outer_layout_h[1],
+            centered_layout[1],
         );
     }
     fn rewrite_view(&mut self, f: &mut Frame) {
