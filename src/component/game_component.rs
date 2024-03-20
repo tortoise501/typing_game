@@ -1,5 +1,8 @@
 use crossterm::event::KeyModifiers;
-use ratatui::{layout::{Constraint, Direction, Layout}, text};
+use ratatui::{
+    layout::{Constraint, Direction, Layout},
+    text,
+};
 
 use super::*;
 
@@ -45,14 +48,18 @@ impl Component for GameComp {
 }
 impl GameComp {
     fn normal_view(&mut self, f: &mut Frame) {
-        let write_field_rows = 3;//height of field where text is displayed //TODO: make it changeable in game settings
+        let write_field_rows = 3; //height of field where text is displayed //TODO: make it changeable in game settings
 
         let matched_letter_vec = self.game.get_written_vec();
 
         //how many letter to skip to allow wrapping //TODO: doesn't work well with wrapping, fix for wrapping (process words instead off letters?)
-        let text_width = (f.size().width - 5 )as usize;
-        let filled_letters = matched_letter_vec.iter().filter(|&x| {x.state != FieldState::Unfilled} ).count();
-        let letters_to_skip = filled_letters - (filled_letters % (text_width * (write_field_rows as f32 / 2.0).round() as usize));
+        let text_width = (f.size().width - 5) as usize;
+        let filled_letters = matched_letter_vec
+            .iter()
+            .filter(|&x| x.state != FieldState::Unfilled)
+            .count();
+        let letters_to_skip = filled_letters
+            - (filled_letters % (text_width * (write_field_rows as f32 / 2.0).round() as usize));
 
         let mut text: Vec<Span> = Vec::new();
         let mut unfilled_started = false;
@@ -81,7 +88,6 @@ impl GameComp {
         }
         let text: Line = Line::from(text);
 
-
         let write_field_rows = write_field_rows as u16;
         //layout that divides screen on top, center and bottom rows
         let y_center_layout = Layout::default()
@@ -101,7 +107,6 @@ impl GameComp {
                 Constraint::Length(1),
             ])
             .split(y_center_layout[1]);
-
 
         f.render_widget(Block::new().title("Border").borders(Borders::ALL), f.size());
         f.render_widget(
