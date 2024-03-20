@@ -1,8 +1,5 @@
 use crossterm::event::KeyModifiers;
-use ratatui::{
-    layout::{Constraint, Direction, Layout},
-    text,
-};
+use ratatui::layout::{Constraint, Direction, Layout};
 
 use super::*;
 
@@ -31,6 +28,12 @@ impl Component for GameComp {
                 }
                 _ => None,
             },
+            Message::Tick => {
+                if self.game.is_complete() {
+                    return Message::StopGame;
+                };
+                None
+            }
             _ => None,
         };
         match answer {

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::game;
 
 use super::*;
@@ -55,11 +57,11 @@ impl Component for MenuComp {
                 KeyCode::Char(' ') | KeyCode::Enter => match self.current_opt {
                     MenuOptions::StartNormal => Some(Message::StartGame(game::GameConf {
                         mode: game::GameMode::Normal,
-                        limit: game::Limit::None,
+                        limit: game::Limit::Time(Duration::from_secs(7)), // !NEEDED FOR TESTING
                     })),
                     MenuOptions::StartRewrite => Some(Message::StartGame(game::GameConf {
                         mode: game::GameMode::Rewrite,
-                        limit: game::Limit::WordCount(3),
+                        limit: game::Limit::WordCount(3), // !NEEDED FOR TESTING
                     })),
                     MenuOptions::ExitProgram => Some(Message::Quit),
                 },
