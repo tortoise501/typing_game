@@ -26,9 +26,6 @@ pub struct Game {
     // pub game_mode: GameMode,
     pub game_conf: GameConf,
 }
-//TODO: Limits by time
-//TODO: Limits by word count
-//TODO: No Limits
 impl Game {
     pub fn new(size: usize, conf: GameConf, text: Option<String>) -> Game {
         Game {
