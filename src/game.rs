@@ -93,7 +93,7 @@ impl Game {
                     .unwrap(); //?Probably not safe
                 time_passed >= t
             }
-            Limit::WordCount(count) => self.statistics.total_words >= count, //?Possible problem if statistics are not updated, should update statistic after every input
+            Limit::WordCount(count) => self.get_total_words_count() >= count, //?Possible problem if statistics are not updated, should update statistic after every input
             Limit::None => false,
         }
     }
@@ -185,9 +185,9 @@ impl Game {
             .iter()
             .filter(|c| **c == ' ')
             .count() as u32;
-        if self.correct_text.len() > 0 {
-            return count + 1;
-        }
+        // if self.correct_text.len() > 0 {
+        //     return count + 1;//?Needed for last word to count but brakes word limit
+        // }
         count
     }
 }

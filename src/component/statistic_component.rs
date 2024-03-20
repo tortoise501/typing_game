@@ -44,7 +44,7 @@ impl Component for StatComp {
         f.render_widget(
             Paragraph::new(format!(
                 "Your total speed was: {} wpm.\n At the end of the test you had {} words written wrong.\nYour accuracy is {:.2}.\nImagine this is a graph (WIP): {:?}\nPress 'Enter' to go to menu or 'Esc' to exit the game.\n\n\n\n\n debugging{:?}",
-                stats.speed_stat.last().unwrap(),
+                stats.speed_stat.last().or(Some(&0)).unwrap(),
                 stats.total_words - stats.correct_words,
                 ((stats.correct_strokes as f32 / (stats.correct_strokes + stats.wrong_strokes) as f32) * 100.0),
                 stats.speed_stat,

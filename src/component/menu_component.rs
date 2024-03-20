@@ -59,7 +59,7 @@ impl Component for MenuComp {
                     })),
                     MenuOptions::StartRewrite => Some(Message::StartGame(game::GameConf {
                         mode: game::GameMode::Rewrite,
-                        limit: game::Limit::None,
+                        limit: game::Limit::WordCount(3),
                     })),
                     MenuOptions::ExitProgram => Some(Message::Quit),
                 },
