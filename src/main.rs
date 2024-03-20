@@ -114,6 +114,7 @@ fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
                 if game.is_complete() {
                     Some(Message::GoToWindow(WindowType::Statistics(StatComp {
                         game,
+                        result_text: None,
                     })))
                 } else {
                     Some(Message::GoToWindow(WindowType::Menu(MenuComp::new())))
