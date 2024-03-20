@@ -53,8 +53,14 @@ impl Component for MenuComp {
             Message::KeyInput(key) => match key.code {
                 // KeyCode::Esc => Some(Message::Quit),
                 KeyCode::Char(' ') | KeyCode::Enter => match self.current_opt {
-                    MenuOptions::StartNormal => Some(Message::StartGame(game::GameMode::Normal)),
-                    MenuOptions::StartRewrite => Some(Message::StartGame(game::GameMode::Rewrite)),
+                    MenuOptions::StartNormal => Some(Message::StartGame(game::GameConf {
+                        mode: game::GameMode::Normal,
+                        limit: game::Limit::None,
+                    })),
+                    MenuOptions::StartRewrite => Some(Message::StartGame(game::GameConf {
+                        mode: game::GameMode::Rewrite,
+                        limit: game::Limit::None,
+                    })),
                     MenuOptions::ExitProgram => Some(Message::Quit),
                 },
                 KeyCode::Down => {
