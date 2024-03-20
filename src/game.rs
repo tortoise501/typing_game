@@ -91,13 +91,9 @@ impl Game {
                 let time_passed = SystemTime::now()
                     .duration_since(self.statistics.time_started)
                     .unwrap(); //?Probably not safe
-                if time_passed >= t {
-                    true
-                } else {
-                    false
-                }
+                time_passed >= t
             }
-            Limit::WordCount(count) => todo!(),
+            Limit::WordCount(count) => self.statistics.total_words >= count, //?Possible problem if statistics are not updated, should update statistic after every input
             Limit::None => false,
         }
     }
