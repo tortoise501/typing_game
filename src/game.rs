@@ -1,4 +1,4 @@
-use std::time::{Duration, SystemTime};
+use std::time::{self, Duration, SystemTime};
 
 #[derive(Clone, Debug)]
 pub enum GameMode {
@@ -26,6 +26,9 @@ pub struct Game {
     // pub game_mode: GameMode,
     pub game_conf: GameConf,
 }
+//TODO: Limits by time
+//TODO: Limits by word count
+//TODO: No Limits
 impl Game {
     pub fn new(size: usize, conf: GameConf, text: Option<String>) -> Game {
         Game {
@@ -79,7 +82,24 @@ impl Game {
 
     /// Returns true if length of written text is the same as length of correct text
     pub fn is_complete(&self) -> bool {
-        self.written_vec.len() == self.correct_text.len()
+        if self.written_vec.len() == self.correct_text.len() {
+            return true;
+        } //needed even for time limit
+
+        match self.game_conf.limit {
+            Limit::Time(t) => {
+                let time_passed = SystemTime::now()
+                    .duration_since(self.statistics.time_started)
+                    .unwrap(); //?Probably not safe
+                if time_passed >= t {
+                    true
+                } else {
+                    false
+                }
+            }
+            Limit::WordCount(count) => todo!(),
+            Limit::None => false,
+        }
     }
 
     /// "Press" backspace for written text, deletes 1 correct stroke if letter is correct //TODO?:doesn't allow to delete letters of correctly finished word
