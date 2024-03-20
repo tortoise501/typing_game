@@ -6,19 +6,38 @@ pub enum GameMode {
     Rewrite,
 }
 #[derive(Clone, Debug)]
+pub struct GameConf {
+    pub mode: GameMode,
+    pub limit: Limit,
+}
+
+#[derive(Clone, Debug)]
+pub enum Limit {
+    Time(Duration),
+    WordCount(u32),
+    None,
+}
+
+#[derive(Clone, Debug)]
 pub struct Game {
     pub correct_text: Vec<char>,
     pub written_vec: Vec<Letter>,
     pub statistics: GameStat,
-    pub game_mode: GameMode,
+    // pub game_mode: GameMode,
+    pub game_conf: GameConf,
 }
 impl Game {
-    pub fn new(size: usize, mode: GameMode) -> Game {
+    pub fn new(size: usize, conf: GameConf, text: Option<String>) -> Game {
         Game {
-            correct_text: Game::get_random_text(size).chars().collect(),
+            correct_text: if let Some(t) = text {
+                t.chars().collect() //use text if given
+            } else {
+                Game::get_random_text(size).chars().collect() //generate new text if text is not given
+            },
             written_vec: Vec::new(),
             statistics: GameStat::new(),
-            game_mode: mode,
+            // game_mode: mode,
+            game_conf: conf,
         }
     }
 
@@ -211,7 +230,11 @@ mod test {
             correct_text: "ccccc".chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
-            game_mode: GameMode::Normal,
+            // game_mode: GameMode::Normal,
+            game_conf: GameConf {
+                mode: GameMode::Normal,
+                limit: Limit::None,
+            },
         };
         let written_text: Vec<char> = "ccccc".chars().collect();
         for c in written_text {
@@ -248,7 +271,11 @@ mod test {
             correct_text: "wwwww".chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
-            game_mode: GameMode::Normal,
+            // game_mode: GameMode::Normal,
+            game_conf: GameConf {
+                mode: GameMode::Normal,
+                limit: Limit::None,
+            },
         };
         let written_text: Vec<char> = "-----".chars().collect();
         for c in written_text {
@@ -285,7 +312,11 @@ mod test {
             correct_text: "ccwcu".chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
-            game_mode: GameMode::Normal,
+            // game_mode: GameMode::Normal,
+            game_conf: GameConf {
+                mode: GameMode::Normal,
+                limit: Limit::None,
+            },
         };
         let written_text: Vec<char> = "cc-c".chars().collect();
         for c in written_text {
@@ -322,7 +353,11 @@ mod test {
             correct_text: "cc cc cc cc".chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
-            game_mode: GameMode::Normal,
+            // game_mode: GameMode::Normal,
+            game_conf: GameConf {
+                mode: GameMode::Normal,
+                limit: Limit::None,
+            },
         };
         let written_text: Vec<char> = "ccuuc cc cc".chars().collect();
         for c in written_text {
@@ -337,7 +372,11 @@ mod test {
             correct_text: "cc cc cc cc".chars().collect(),
             written_vec: Vec::new(),
             statistics: GameStat::new(),
-            game_mode: GameMode::Normal,
+            // game_mode: GameMode::Normal,
+            game_conf: GameConf {
+                mode: GameMode::Normal,
+                limit: Limit::None,
+            },
         };
         let written_text: Vec<char> = "ccuuc cc cc".chars().collect();
         for c in written_text {
@@ -349,7 +388,14 @@ mod test {
     #[ignore = "makes thread sleepy -_- zzz"]
     #[test]
     fn get_time_test() {
-        let mut test_game = Game::new(90, GameMode::Normal);
+        let mut test_game = Game::new(
+            90,
+            GameConf {
+                mode: GameMode::Normal,
+                limit: Limit::None,
+            },
+            None,
+        );
         let pass_dur = Duration::new(2, 0);
         sleep(pass_dur);
 

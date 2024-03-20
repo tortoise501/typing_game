@@ -40,7 +40,7 @@ impl Component for GameComp {
     }
 
     fn view(&mut self, f: &mut Frame) {
-        match self.game.game_mode {
+        match self.game.game_conf.mode {
             crate::game::GameMode::Normal => self.normal_view(f),
             crate::game::GameMode::Rewrite => self.rewrite_view(f),
         }
