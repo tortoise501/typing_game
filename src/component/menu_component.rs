@@ -15,11 +15,12 @@ pub struct MenuComp {
 pub enum MenuOptions {
     StartNormal = 0,
     StartRewrite = 1,
-    ExitProgram = 2,
+    GameSettings = 2,
+    ExitProgram = 3,
 }
 impl MenuOptions {
     pub fn go_next(&mut self) {
-        let i = if *self as u32 == 2 {
+        let i = if *self as u32 == 3 {
             //2 means last element of an enum -- crunch
             return;
         } else {
@@ -63,6 +64,9 @@ impl Component for MenuComp {
                         mode: game::GameMode::Rewrite,
                         limit: game::Limit::WordCount(3), // !NEEDED FOR TESTING
                     })),
+                    MenuOptions::GameSettings => Some(Message::GoToWindow(
+                        WindowType::GameConfigMenu(GameConfigComp { game_conf: None }), //TODO: create new function with default game conf
+                    )),
                     MenuOptions::ExitProgram => Some(Message::Quit),
                 },
                 KeyCode::Down => {
