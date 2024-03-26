@@ -50,24 +50,29 @@ impl Component for StatComp {
         //     stats.speed_stat,
         //     stats
         // ))).unwrap();
-        let text = self.result_text.clone().or(Some(format!(
+        self.result_text = self.result_text.clone().or(Some(format!(
             "Your total speed was: {} wpm.\nAt the end of the test you had {} words written wrong.\nYour accuracy is {:.2}.\nImagine this is a graph (WIP): {:?}\nPress 'Enter' to go to menu or 'Esc' to exit the game.\n\n\n\n\n debugging{:?}",
             stats.speed_stat.last().or(Some(&0)).unwrap(),
             stats.total_words - stats.correct_words,
             ((stats.correct_strokes as f32 / (stats.correct_strokes + stats.wrong_strokes) as f32) * 100.0),
             stats.speed_stat,
             stats
-        ))).unwrap();
+        )));
         f.render_widget(
-            Paragraph::new(text)
-                .block(
-                    Block::new()
-                        .title("Your game statistics")
-                        .borders(Borders::ALL),
-                )
-                .style(Style::new().white().on_black())
-                .alignment(Alignment::Left)
-                .wrap(Wrap { trim: false }),
+            Paragraph::new(
+                self.result_text
+                    .clone()
+                    .or(Some(String::from("err")))
+                    .unwrap(),
+            )
+            .block(
+                Block::new()
+                    .title("Your game statistics")
+                    .borders(Borders::ALL),
+            )
+            .style(Style::new().white().on_black())
+            .alignment(Alignment::Left)
+            .wrap(Wrap { trim: false }),
             f.size(),
         );
     }

@@ -22,12 +22,16 @@ pub use game_component::GameComp;
 pub mod statistic_component;
 pub use statistic_component::StatComp;
 
+pub mod game_conf_component;
+pub use game_conf_component::GameConfigComp;
+
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum WindowType {
     Menu(MenuComp),
     Game(GameComp),
     Statistics(StatComp),
+    GameConfigMenu(GameConfigComp),
 }
 impl WindowType {
     pub fn get_as_comp(&mut self) -> &mut dyn Component {
@@ -35,6 +39,7 @@ impl WindowType {
             WindowType::Menu(comp) => comp,
             WindowType::Game(comp) => comp,
             WindowType::Statistics(comp) => comp,
+            WindowType::GameConfigMenu(comp) => comp,
         }
     }
 }

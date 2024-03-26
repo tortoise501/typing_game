@@ -44,23 +44,19 @@ fn main() -> Result<()> {
         // let input = input::get_input_process_input();
         let mut current_msg = match rx.recv() {
             //? Not Safe
-            Ok(om) => {
-                match om {
-                    OutsideMessage::Message(msg) => Some(msg),
-                    OutsideMessage::InputSignal(sig) => {
-                        match sig {
-                            Some(s) => match s {
-                                InputSignal::Key(key) => Some(Message::KeyInput(key)),
-                                InputSignal::TerminateProgram => {
-                                    tui::restore_terminal()?;
-                                    exit(0)
-                                } //TODO: better program termination
-                            },
-                            None => None,
+            Ok(om) => match om {
+                OutsideMessage::Message(msg) => Some(msg),
+                OutsideMessage::InputSignal(sig) => match sig {
+                    Some(s) => match s {
+                        InputSignal::Key(key) => Some(Message::KeyInput(key)),
+                        InputSignal::TerminateProgram => {
+                            tui::restore_terminal()?;
+                            exit(0)
                         }
-                    }
-                }
-            }
+                    },
+                    None => None,
+                },
+            },
             Err(_) => {
                 // println!("{:?}", e);
                 // tick_thread.join();
