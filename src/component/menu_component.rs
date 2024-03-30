@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use crate::game;
+use crate::{component::game_conf_component, game::GameConf};
 
 use super::*;
 use num_derive::FromPrimitive;
@@ -65,7 +66,10 @@ impl Component for MenuComp {
                         limit: game::Limit::WordCount(3), // !NEEDED FOR TESTING
                     })),
                     MenuOptions::GameSettings => Some(Message::GoToWindow(
-                        WindowType::GameConfigMenu(GameConfigComp { game_conf: None }), //TODO: create new function with default game conf
+                        WindowType::GameConfigMenu(GameConfigComp {
+                            game_conf: game::GameConf::new(),
+                            option: game_conf_component::SelectedOption::Mode,
+                        }), //TODO: create new function with default game conf
                     )),
                     MenuOptions::ExitProgram => Some(Message::Quit),
                 },

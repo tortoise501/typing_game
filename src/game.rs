@@ -1,6 +1,6 @@
 use std::time::{Duration, SystemTime};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum GameMode {
     Normal,
     Rewrite,
@@ -10,8 +10,16 @@ pub struct GameConf {
     pub mode: GameMode,
     pub limit: Limit,
 }
+impl GameConf {
+    pub fn new() -> GameConf {
+        GameConf {
+            mode: GameMode::Normal,
+            limit: Limit::Time(Duration::from_secs(30)),
+        }
+    }
+}
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Limit {
     Time(Duration),
     WordCount(u32),
