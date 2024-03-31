@@ -99,6 +99,19 @@ impl Component for GameConfigComp {
                     self.option.right(&mut self.game_conf);
                     None
                 }
+                KeyCode::Backspace => {
+                    match &mut self.game_conf.limit {
+                        Limit::Time(t) => {
+                            *t = Duration::from_secs(t.as_secs() / 10);
+                            None
+                        }
+                        Limit::WordCount(wc) => {
+                            *wc = *wc / 10;
+                            None
+                        }
+                        Limit::None => None, //TODO: path for custom file
+                    }
+                }
                 KeyCode::Char(c) if self.option == SelectedOption::Input => {
                     match &mut self.game_conf.limit {
                         Limit::Time(t) => {
@@ -120,6 +133,9 @@ impl Component for GameConfigComp {
                         }
                         Limit::None => None, //TODO: path for custom file
                     }
+                }
+                KeyCode::Enter if self.option == SelectedOption::Input => {
+                    Some(Message::StartGame(self.game_conf.clone()))
                 }
                 _ => None,
             },
