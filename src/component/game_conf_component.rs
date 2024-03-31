@@ -6,6 +6,7 @@ use ratatui::layout::{Constraint, Layout};
 
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
+use ratatui::widgets::canvas::Line;
 
 use super::*;
 use crate::game::{GameConf, GameMode, Limit};
@@ -182,12 +183,8 @@ impl Component for GameConfigComp {
             } else {
                 Style::new().white().on_black()
             };
-            f.render_widget(
-                Paragraph::new(text)
-                    .style(style)
-                    .alignment(Alignment::Center),
-                rect,
-            );
+            let text = Span::raw(text).style(style);
+            f.render_widget(Paragraph::new(text).alignment(Alignment::Center), rect);
         };
 
         let mode_selector_layout = Layout::default()
