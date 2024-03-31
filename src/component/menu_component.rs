@@ -14,40 +14,29 @@ pub struct MenuComp {
 }
 #[derive(Debug, PartialEq, FromPrimitive, Clone, Copy)]
 pub enum MenuOptions {
-    StartNormal = 0,
-    StartRewrite = 1,
-    GameSettings = 2,
-    ExitProgram = 3,
+    GameConf = 0,
+    ExitProgram = 1,
 }
 impl MenuOptions {
     pub fn go_next(&mut self) {
-        let i = if *self as u32 == 3 {
-            //2 means last element of an enum -- crunch
-            return;
-        } else {
-            *self as u32 + 1
-        };
-        *self = match FromPrimitive::from_u32(i) {
+        let i = *self as i32 + 1;
+        *self = match FromPrimitive::from_i32(i) {
             Some(opt) => opt,
-            None => MenuOptions::StartNormal,
+            None => MenuOptions::GameConf,
         }
     }
     pub fn go_prev(&mut self) {
-        let i = if *self as u32 == 0 {
-            return;
-        } else {
-            *self as u32 - 1
-        };
-        *self = match FromPrimitive::from_u32(i) {
+        let i = *self as i32 - 1;
+        *self = match FromPrimitive::from_i32(i) {
             Some(opt) => opt,
-            None => MenuOptions::StartNormal,
+            None => MenuOptions::ExitProgram,
         }
     }
 }
 impl MenuComp {
     pub fn new() -> MenuComp {
         MenuComp {
-            current_opt: MenuOptions::StartNormal,
+            current_opt: MenuOptions::GameConf,
         }
     }
 }
@@ -57,15 +46,7 @@ impl Component for MenuComp {
             Message::KeyInput(key) => match key.code {
                 // KeyCode::Esc => Some(Message::Quit),
                 KeyCode::Char(' ') | KeyCode::Enter => match self.current_opt {
-                    MenuOptions::StartNormal => Some(Message::StartGame(game::GameConf {
-                        mode: game::GameMode::Normal,
-                        limit: game::Limit::Time(Duration::from_secs(7)), // !NEEDED FOR TESTING
-                    })),
-                    MenuOptions::StartRewrite => Some(Message::StartGame(game::GameConf {
-                        mode: game::GameMode::Rewrite,
-                        limit: game::Limit::WordCount(3), // !NEEDED FOR TESTING
-                    })),
-                    MenuOptions::GameSettings => Some(Message::GoToWindow(
+                    MenuOptions::GameConf => Some(Message::GoToWindow(
                         WindowType::GameConfigMenu(GameConfigComp {
                             game_conf: game::GameConf::new(),
                             option: game_conf_component::SelectedOption::Mode,
@@ -94,16 +75,8 @@ impl Component for MenuComp {
     fn view(&mut self, f: &mut Frame) {
         let lines = vec![
             Line::from(Span::styled(
-                "Start normal",
-                if self.current_opt == MenuOptions::StartNormal {
-                    Style::new().black().on_white()
-                } else {
-                    Style::new()
-                },
-            )),
-            Line::from(Span::styled(
                 "Start rewrite",
-                if self.current_opt == MenuOptions::StartRewrite {
+                if self.current_opt == MenuOptions::GameConf {
                     Style::new().black().on_white()
                 } else {
                     Style::new()
