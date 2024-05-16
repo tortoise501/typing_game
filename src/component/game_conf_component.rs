@@ -5,7 +5,7 @@ use std::{fmt::format, option, time::Duration};
 use ratatui::layout::{Constraint, Layout};
 
 use num_derive::FromPrimitive;
-use num_traits::FromPrimitive;
+use num_traits::{clamp_max, FromPrimitive};
 use ratatui::widgets::canvas::Line;
 
 use super::*;
@@ -118,17 +118,25 @@ impl Component for GameConfigComp {
                         Limit::Time(t) => {
                             if c.is_numeric() {
                                 let mut sec = t.as_secs();
-                                sec *= 10;
-                                sec += c.to_digit(10).unwrap() as u64;
-                                *t = Duration::from_secs(sec)
+                                if sec < 600 {
+                                    //600 seconds is time limit, crunch to avoid too big numbers
+                                    sec *= 10;
+                                    sec += c.to_digit(10).unwrap() as u64;
+                                    *t = Duration::from_secs(clamp_max(sec, 600))
+                                } else {
+                                    *t = Duration::from_secs(600)
+                                }
                             }
                             None
                         }
                         Limit::WordCount(wc) => {
                             if c.is_numeric() {
-                                let mut count = *wc * 10;
-                                count += c.to_digit(10).unwrap() as u32;
-                                *wc = count
+                                if *wc < 10000 {
+                                    //10000 is max word count, crunch to avoid too big numbers
+                                    let mut count = *wc * 10;
+                                    count += c.to_digit(10).unwrap() as u32;
+                                    *wc = clamp_max(count, 10000);
+                                }
                             }
                             None
                         }

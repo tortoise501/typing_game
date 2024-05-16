@@ -51,7 +51,7 @@ fn main() -> Result<()> {
                         InputSignal::Key(key) => Some(Message::KeyInput(key)),
                         InputSignal::TerminateProgram => {
                             tui::restore_terminal()?;
-                            exit(0)
+                            panic!("TODO: better program termination")
                         }
                     },
                     None => None,

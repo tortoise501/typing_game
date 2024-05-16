@@ -46,12 +46,12 @@ impl Component for MenuComp {
             Message::KeyInput(key) => match key.code {
                 // KeyCode::Esc => Some(Message::Quit),
                 KeyCode::Char(' ') | KeyCode::Enter => match self.current_opt {
-                    MenuOptions::GameConf => Some(Message::GoToWindow(
-                        WindowType::GameConfigMenu(GameConfigComp {
+                    MenuOptions::GameConf => Some(Message::GoToWindow(WindowType::GameConfigMenu(
+                        GameConfigComp {
                             game_conf: game::GameConf::new(),
                             option: game_conf_component::SelectedOption::Mode,
-                        }), //TODO: create new function with default game conf
-                    )),
+                        },
+                    ))),
                     MenuOptions::ExitProgram => Some(Message::Quit),
                 },
                 KeyCode::Down => {

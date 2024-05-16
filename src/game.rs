@@ -103,7 +103,7 @@ impl Game {
         }
     }
 
-    /// "Press" backspace for written text, deletes 1 correct stroke if letter is correct //TODO?:doesn't allow to delete letters of correctly finished word
+    /// "Press" backspace for written text, deletes 1 correct stroke if letter is correct
     pub fn clear_last_letter(&mut self) {
         let letter = self.written_vec.pop();
         if letter.is_some() && letter.unwrap().state == FieldState::Correct {
@@ -116,12 +116,12 @@ impl Game {
             if self
                 .written_vec
                 .last()
-                .is_some_and(|l| l.c != ' ' && l.state == FieldState::Correct)
+                .is_some_and(|l| l.c == ' ' && l.state == FieldState::Correct)
             {
                 break;
             }
             if !self.written_vec.last().is_some() {
-                break;
+                break; //stop deleting letters if no letters left
             }
         }
     }
