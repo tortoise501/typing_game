@@ -93,7 +93,7 @@ fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
     match answer {
         Message::StartGame(conf) => {
             model.active_window = WindowType::Game(GameComp {
-                game: Game::new(20, conf, None), //TODO: not handling custom texts
+                game: Game::new(0, conf, None), //TODO: not handling custom texts
             });
             None
         }

@@ -40,8 +40,16 @@ impl Game {
             correct_text: if let Some(t) = text {
                 t.chars().collect() //use text if given
             } else {
-                Game::get_random_text(size).chars().collect() //generate new text if text is not given
+                let text;
+                if let Limit::WordCount(t) = conf.limit {
+                    //generate new text if limit is word count
+                    text = Game::get_random_text((t + 1) as usize).chars().collect();
+                } else {
+                    text = Game::get_random_text(size).chars().collect(); //generate new text if limit is time
+                }
+                text
             },
+
             written_vec: Vec::new(),
             statistics: GameStat::new(),
             // game_mode: mode,
@@ -143,7 +151,9 @@ impl Game {
 
     ///Gets random text for a game
     pub fn get_random_text(size: usize) -> String {
-        crate::markov_gen::generate(size)
+        //crate::markov_gen::generate(size)
+        let mr = markov_rope::MarkovChain::default();
+        mr.generate_text(size as u32).unwrap() ////!TESTING
     }
 
     /// Returns game statistics
