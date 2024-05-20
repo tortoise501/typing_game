@@ -188,9 +188,6 @@ impl Game {
                 is_wrong = false;
             }
         }
-        // if !is_wrong {
-        //     count += 1; //TODO: crunch to fix las word check
-        // }
         count
     }
     pub fn get_total_words_count(&self) -> u32 {
