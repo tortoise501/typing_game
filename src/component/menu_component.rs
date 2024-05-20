@@ -1,7 +1,5 @@
-use std::time::Duration;
-
+use crate::component::game_conf_component;
 use crate::game;
-use crate::{component::game_conf_component, game::GameConf};
 
 use super::*;
 use num_derive::FromPrimitive;

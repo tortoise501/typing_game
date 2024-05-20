@@ -1,12 +1,9 @@
-use std::cell::RefCell;
-use std::rc;
-use std::{fmt::format, option, time::Duration};
+use std::time::Duration;
 
 use ratatui::layout::{Constraint, Layout};
 
 use num_derive::FromPrimitive;
 use num_traits::{clamp_max, FromPrimitive};
-use ratatui::widgets::canvas::Line;
 
 use super::*;
 use crate::game::{GameConf, GameMode, Limit};
@@ -22,7 +19,6 @@ pub enum SelectedOption {
     Limit,
     Input,
 }
-type RCell<T> = rc::Rc<RefCell<T>>;
 impl SelectedOption {
     pub fn next(&mut self) {
         let i = *self as i32 + 1;
