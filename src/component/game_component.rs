@@ -57,22 +57,22 @@ impl GameComp {
 
         //how many letter to skip to allow wrapping //TODO: doesn't work well with wrapping, fix for wrapping (process words instead off letters?)
         let text_width = (f.size().width - 5) as usize;
-        let filled_letters = matched_letter_vec
-            .iter()
-            .filter(|&x| x.state != FieldState::Unfilled)
-            .count();
-        let letters_to_skip = filled_letters
-            - (filled_letters % (text_width * (write_field_rows as f32 / 2.0).round() as usize));
 
-        let mut text: Vec<Span> = Vec::new();
+        let mut line: Vec<Span> = Vec::new();
+        let mut text: Vec<Line> = Vec::new();
         let mut unfilled_started = false;
-        for letter in &matched_letter_vec[letters_to_skip..] {
-            text.push(Span::styled(
+
+        let mut letter_in_string_count = 0;
+        let mut word_cache: Vec<Span> = Vec::new();
+
+        for letter in &matched_letter_vec {
+            //creating Span representing one character colored in its state colors
+            word_cache.push(Span::styled(
                 format!("{}", letter.c),
                 match letter.state {
                     FieldState::Unfilled if !unfilled_started => {
                         unfilled_started = true;
-                        Style::new().on_gray().black().not_underlined()
+                        Style::new().on_gray().black().not_underlined() //cursor
                     }
                     FieldState::Unfilled => Style::new().gray().not_underlined(),
                     FieldState::Correct => Style::new().green().not_underlined(),
@@ -88,8 +88,27 @@ impl GameComp {
                     }
                 },
             ));
+
+            //wrapping on new word
+            if letter.c == ' ' {
+                if letter_in_string_count + word_cache.len() >= text_width {
+                    letter_in_string_count = 0;
+                    text.push(Line::from(line));
+                    line = Vec::new();
+
+                    if !unfilled_started && write_field_rows / 2 < text.len() {
+                        //starts wrapping only after second word in new row for some reason//TODO: try to fix it
+                        text.remove(0);
+                    }
+                }
+                letter_in_string_count += word_cache.len();
+                line.append(&mut word_cache);
+            }
         }
-        let text: Line = Line::from(text);
+
+        //placing /n for custom wrapping
+
+        // let text: Line = Line::from(text);
 
         let write_field_rows = write_field_rows as u16;
         //layout that divides screen on top, center and bottom rows
@@ -116,8 +135,8 @@ impl GameComp {
             Paragraph::new(text)
                 .block(Block::new().borders(Borders::ALL))
                 .style(Style::new().white().on_black())
-                .alignment(Alignment::Left)
-                .wrap(Wrap { trim: false }),
+                // .wrap(Wrap { trim: false })
+                .alignment(Alignment::Left),
             centered_layout[1],
         );
     }
