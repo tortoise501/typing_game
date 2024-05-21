@@ -1,7 +1,5 @@
-use std::time::Duration;
-
+use crate::component::game_conf_component;
 use crate::game;
-use crate::{component::game_conf_component, game::GameConf};
 
 use super::*;
 use num_derive::FromPrimitive;
@@ -12,12 +10,15 @@ use ratatui::{self, widgets::Padding};
 pub struct MenuComp {
     current_opt: MenuOptions,
 }
+
+///options in menu navigational panel
 #[derive(Debug, PartialEq, FromPrimitive, Clone, Copy)]
 pub enum MenuOptions {
     GameConf = 0,
     ExitProgram = 1,
 }
 impl MenuOptions {
+    ///next option
     pub fn go_next(&mut self) {
         let i = *self as i32 + 1;
         *self = match FromPrimitive::from_i32(i) {
@@ -25,6 +26,7 @@ impl MenuOptions {
             None => MenuOptions::GameConf,
         }
     }
+    ///previous option
     pub fn go_prev(&mut self) {
         let i = *self as i32 - 1;
         *self = match FromPrimitive::from_i32(i) {

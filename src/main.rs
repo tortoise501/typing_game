@@ -1,6 +1,6 @@
 use crossterm::event::KeyEvent;
 use input::InputSignal;
-use std::{io::Result, process::exit, sync::mpsc, thread, time::Duration};
+use std::{io::Result, sync::mpsc, thread, time::Duration};
 
 use ratatui::Frame;
 
@@ -13,7 +13,6 @@ use crate::component::{Component, GameComp, MenuComp, StatComp, WindowType};
 mod component;
 mod game;
 mod input;
-mod markov_gen;
 mod model;
 mod tui;
 enum OutsideMessage {
@@ -93,7 +92,7 @@ fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
     match answer {
         Message::StartGame(conf) => {
             model.active_window = WindowType::Game(GameComp {
-                game: Game::new(0, conf, None), //TODO: not handling custom texts
+                game: Game::new(1000, conf, None),
             });
             None
         }
@@ -110,7 +109,7 @@ fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
                 if game.is_complete() {
                     Some(Message::GoToWindow(WindowType::Statistics(StatComp {
                         game,
-                        result_text: None,
+                        statistics: None,
                     })))
                 } else {
                     Some(Message::GoToWindow(WindowType::Menu(MenuComp::new())))

@@ -1,29 +1,27 @@
-use std::cell::RefCell;
-use std::rc;
-use std::{fmt::format, option, time::Duration};
+use std::time::Duration;
 
 use ratatui::layout::{Constraint, Layout};
 
 use num_derive::FromPrimitive;
 use num_traits::{clamp_max, FromPrimitive};
-use ratatui::widgets::canvas::Line;
 
 use super::*;
 use crate::game::{GameConf, GameMode, Limit};
-
+/// component responsible for configuration window
 #[derive(Debug)]
 pub struct GameConfigComp {
     pub game_conf: GameConf,
     pub option: SelectedOption,
 }
+///configuration option selected for input
 #[derive(Debug, PartialEq, FromPrimitive, Clone, Copy)]
 pub enum SelectedOption {
     Mode,
     Limit,
     Input,
 }
-type RCell<T> = rc::Rc<RefCell<T>>;
 impl SelectedOption {
+    ///select next option
     pub fn next(&mut self) {
         let i = *self as i32 + 1;
         *self = match FromPrimitive::from_i32(i) {
@@ -31,6 +29,7 @@ impl SelectedOption {
             None => SelectedOption::Mode,
         }
     }
+    ///select previous option
     pub fn prev(&mut self) {
         let i = *self as i32 - 1;
         *self = match FromPrimitive::from_i32(i) {
@@ -38,6 +37,7 @@ impl SelectedOption {
             None => SelectedOption::Input,
         }
     }
+    ///select next type of this option
     fn right(&mut self, conf: &mut GameConf) {
         match self {
             SelectedOption::Mode => {
@@ -56,6 +56,8 @@ impl SelectedOption {
             SelectedOption::Input => (),
         }
     }
+
+    ///select previous type of this option
     fn left(&mut self, conf: &mut GameConf) {
         match self {
             SelectedOption::Mode => {
@@ -79,6 +81,7 @@ impl SelectedOption {
 #[allow(unused_variables)]
 #[allow(dead_code)]
 impl Component for GameConfigComp {
+    /// react to message and answer
     fn handle_message(&mut self, msg: Message) -> Message {
         // let mut conf = &mut self.game_conf;
         let answer = match msg {
@@ -155,7 +158,7 @@ impl Component for GameConfigComp {
             None => msg,
         }
     }
-
+    /// render game configuration window
     fn view(&mut self, f: &mut Frame) {
         //Rendering border
         f.render_widget(Block::new().title("Border").borders(Borders::ALL), f.size());
@@ -179,21 +182,22 @@ impl Component for GameConfigComp {
             .constraints(Constraint::from_ratios([(1, 3), (1, 3), (1, 3)]))
             .split(content_layout[1]);
 
-        let mut render = |text: &str, rect: &ratatui::layout::Rect, is_selected: bool| {
-            f.render_widget(Block::new().borders(Borders::ALL), *rect);
-            let box_top_padding = (rect.height as f32 / 2 as f32).round() as u16 - 1;
-            let rect = Layout::default()
-                .direction(ratatui::layout::Direction::Vertical)
-                .constraints(Constraint::from_lengths([box_top_padding, 1]))
-                .split(*rect)[1];
-            let style = if is_selected {
-                Style::new().black().on_white()
-            } else {
-                Style::new().white().on_black()
+        let mut render =
+            |text: &str, rect: &ratatui::layout::Rect, color: ratatui::style::Color| {
+                f.render_widget(Block::new().borders(Borders::ALL), *rect);
+                let box_top_padding = (rect.height as f32 / 2 as f32).round() as u16 - 1;
+                let rect = Layout::default()
+                    .direction(ratatui::layout::Direction::Vertical)
+                    .constraints(Constraint::from_lengths([box_top_padding, 1]))
+                    .split(*rect)[1];
+                let style = if color == ratatui::style::Color::Black {
+                    Style::new().on_black().white()
+                } else {
+                    Style::new().black().bg(color)
+                };
+                let text = Span::raw(text).style(style);
+                f.render_widget(Paragraph::new(text).alignment(Alignment::Center), rect);
             };
-            let text = Span::raw(text).style(style);
-            f.render_widget(Paragraph::new(text).alignment(Alignment::Center), rect);
-        };
 
         let mode_selector_layout = Layout::default()
             .direction(ratatui::layout::Direction::Horizontal)
@@ -212,25 +216,105 @@ impl Component for GameConfigComp {
         let input_text = format!("limit:{:?}", &self.game_conf.limit);
 
         {
-            //TODO:better rendering with visual clues
-            render("normal", &mode_selector_layout[0], false);
-            render("rewrite", &mode_selector_layout[1], false);
-            render("time", &limit_selector_layout[0], false);
-            render("word count", &limit_selector_layout[1], false);
-            render("custom text", &limit_selector_layout[2], false);
-            render(input_text.as_str(), &limit_input_layout[0], false);
+            render(
+                "normal",
+                &mode_selector_layout[0],
+                ratatui::style::Color::Black,
+            );
+            render(
+                "rewrite",
+                &mode_selector_layout[1],
+                ratatui::style::Color::Black,
+            );
+            render(
+                "time",
+                &limit_selector_layout[0],
+                ratatui::style::Color::Black,
+            );
+            render(
+                "word count",
+                &limit_selector_layout[1],
+                ratatui::style::Color::Black,
+            );
+            render(
+                "custom text",
+                &limit_selector_layout[2],
+                ratatui::style::Color::Black,
+            );
+            render(
+                input_text.as_str(),
+                &limit_input_layout[0],
+                ratatui::style::Color::Black,
+            );
         }
+
+        //rendering set settings for limits
+        match self.game_conf.limit {
+            Limit::Time(_) => render(
+                "time",
+                &limit_selector_layout[0],
+                ratatui::style::Color::Green,
+            ),
+            Limit::WordCount(_) => render(
+                "word count",
+                &limit_selector_layout[1],
+                ratatui::style::Color::Green,
+            ),
+            Limit::None => render(
+                "custom text",
+                &limit_selector_layout[2],
+                ratatui::style::Color::Green,
+            ),
+        }
+        //rendering set settings for mode   ratatui::style::Color::Black
+        match self.game_conf.mode {
+            GameMode::Normal => render(
+                "normal",
+                &mode_selector_layout[0],
+                ratatui::style::Color::Green,
+            ),
+            GameMode::Rewrite => render(
+                "rewrite",
+                &mode_selector_layout[1],
+                ratatui::style::Color::Green,
+            ),
+        }
+
         match &self.option {
             SelectedOption::Mode => match self.game_conf.mode {
-                GameMode::Normal => render("normal", &mode_selector_layout[0], true),
-                GameMode::Rewrite => render("rewrite", &mode_selector_layout[1], true),
+                GameMode::Normal => render(
+                    "normal",
+                    &mode_selector_layout[0],
+                    ratatui::style::Color::White,
+                ),
+                GameMode::Rewrite => render(
+                    "rewrite",
+                    &mode_selector_layout[1],
+                    ratatui::style::Color::White,
+                ),
             },
             SelectedOption::Limit => match self.game_conf.limit {
-                Limit::Time(_) => render("time", &limit_selector_layout[0], true),
-                Limit::WordCount(_) => render("word count", &limit_selector_layout[1], true),
-                Limit::None => render("custom text", &limit_selector_layout[2], true),
+                Limit::Time(_) => render(
+                    "time",
+                    &limit_selector_layout[0],
+                    ratatui::style::Color::White,
+                ),
+                Limit::WordCount(_) => render(
+                    "word count",
+                    &limit_selector_layout[1],
+                    ratatui::style::Color::White,
+                ),
+                Limit::None => render(
+                    "custom text",
+                    &limit_selector_layout[2],
+                    ratatui::style::Color::White,
+                ),
             },
-            SelectedOption::Input => render(input_text.as_str(), &limit_input_layout[0], true),
+            SelectedOption::Input => render(
+                input_text.as_str(),
+                &limit_input_layout[0],
+                ratatui::style::Color::White,
+            ),
         }
     }
 }
