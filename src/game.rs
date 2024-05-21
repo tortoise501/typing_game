@@ -1,6 +1,6 @@
 use std::time::{Duration, SystemTime};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum GameMode {
     Normal,
     Rewrite,
@@ -10,8 +10,16 @@ pub struct GameConf {
     pub mode: GameMode,
     pub limit: Limit,
 }
+impl GameConf {
+    pub fn new() -> GameConf {
+        GameConf {
+            mode: GameMode::Normal,
+            limit: Limit::Time(Duration::from_secs(30)),
+        }
+    }
+}
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Limit {
     Time(Duration),
     WordCount(u32),
@@ -32,8 +40,16 @@ impl Game {
             correct_text: if let Some(t) = text {
                 t.chars().collect() //use text if given
             } else {
-                Game::get_random_text(size).chars().collect() //generate new text if text is not given
+                let text;
+                if let Limit::WordCount(t) = conf.limit {
+                    //generate new text if limit is word count
+                    text = Game::get_random_text((t + 1) as usize).chars().collect();
+                } else {
+                    text = Game::get_random_text(size).chars().collect(); //generate new text if limit is time
+                }
+                text
             },
+
             written_vec: Vec::new(),
             statistics: GameStat::new(),
             // game_mode: mode,
@@ -95,7 +111,7 @@ impl Game {
         }
     }
 
-    /// "Press" backspace for written text, deletes 1 correct stroke if letter is correct //TODO?:doesn't allow to delete letters of correctly finished word
+    /// "Press" backspace for written text, deletes 1 correct stroke if letter is correct
     pub fn clear_last_letter(&mut self) {
         let letter = self.written_vec.pop();
         if letter.is_some() && letter.unwrap().state == FieldState::Correct {
@@ -108,12 +124,12 @@ impl Game {
             if self
                 .written_vec
                 .last()
-                .is_some_and(|l| l.c != ' ' && l.state == FieldState::Correct)
+                .is_some_and(|l| l.c == ' ' && l.state == FieldState::Correct)
             {
                 break;
             }
             if !self.written_vec.last().is_some() {
-                break;
+                break; //stop deleting letters if no letters left
             }
         }
     }
@@ -135,7 +151,9 @@ impl Game {
 
     ///Gets random text for a game
     pub fn get_random_text(size: usize) -> String {
-        crate::markov_gen::generate(size)
+        //crate::markov_gen::generate(size)
+        let mr = markov_rope::MarkovChain::default();
+        mr.generate_text(size as u32).unwrap() ////!TESTING
     }
 
     /// Returns game statistics
