@@ -1,6 +1,11 @@
 use crossterm::event::KeyEvent;
 use input::InputSignal;
-use std::{io::Result, sync::mpsc, thread, time::Duration};
+use std::{
+    io::Result,
+    sync::mpsc,
+    thread,
+    time::{Duration, SystemTime},
+};
 
 use ratatui::Frame;
 
@@ -91,13 +96,18 @@ fn update(model: &mut Model, msg: Message) -> Option<Message> {
 fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
     match answer {
         Message::StartGame(conf) => {
-            model.active_window = WindowType::Game(GameComp {
-                game: Game::new(1000, conf, None),
-            });
+            model.active_window = WindowType::Game(GameComp::new(
+                Game::new(1000, conf, None),
+                SystemTime::now(),
+                Duration::from_secs(5), //TODO: make it configurable with config file
+            ));
             None
         }
         Message::StopGame => Some(match &mut model.active_window {
-            WindowType::Game(comp) => Message::GameStopped(Some(comp.game.clone())),
+            WindowType::Game(comp) => {
+                comp.game.stop_game();
+                Message::GameStopped(Some(comp.game.clone()))
+            }
             _ => Message::GameStopped(None),
         }),
         Message::Quit => {

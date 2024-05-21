@@ -91,6 +91,10 @@ impl Component for StatComp {
         );
 
         let graph_zone = zones_layout[1];
+        f.render_widget(
+            number_paragraph(format!("{:?}", stats.speed_stat)),
+            graph_zone,
+        )
 
         // let result_text = format!(
         //     "Your total speed was: {} wpm.\nAt the end of the test you had {} words written wrong.\nYour accuracy is {:.2}.\nImagine this is a graph (WIP): {:?}\nPress 'Enter' to go to menu or 'Esc' to exit the game.\n\n\n\n\n debugging{:?}",
