@@ -7,10 +7,12 @@ use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use ratatui::Frame;
 
 use crate::Message;
-
+/// component represents window, its behavior and rendering
 pub trait Component {
+    /// processes message, reacts to it and answers with another message
     fn handle_message(&mut self, msg: Message) -> Message;
 
+    /// renders component in set frame
     fn view(&mut self, f: &mut Frame);
 }
 pub mod menu_component;
@@ -25,6 +27,7 @@ pub use statistic_component::StatComp;
 pub mod game_conf_component;
 pub use game_conf_component::GameConfigComp;
 
+/// enum representing witch window is active
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum WindowType {
@@ -34,7 +37,8 @@ pub enum WindowType {
     GameConfigMenu(GameConfigComp),
 }
 impl WindowType {
-    pub fn get_as_comp(&mut self) -> &mut dyn Component {
+    // gets itself as a component - crunch
+    fn get_as_comp(&mut self) -> &mut dyn Component {
         match self {
             WindowType::Menu(comp) => comp,
             WindowType::Game(comp) => comp,
@@ -45,26 +49,10 @@ impl WindowType {
 }
 impl Component for WindowType {
     fn handle_message(&mut self, msg: Message) -> Message {
-        // match self {
-        //     WindowType::Menu(comp) => comp.handle_message(msg),
-        //     WindowType::Game(comp) => comp.handle_message(msg),
-        //     WindowType::Statistics(comp) => comp.handle_message(msg),
-        // }
         self.get_as_comp().handle_message(msg)
     }
 
     fn view(&mut self, f: &mut Frame) {
-        // match self {
-        //     WindowType::Menu(comp) => {
-        //         comp.view(f);
-        //     }
-        //     WindowType::Game(comp) => {
-        //         comp.view(f);
-        //     }
-        //     WindowType::Statistics(comp) => {
-        //         comp.view(f);
-        //     }
-        // };
         self.get_as_comp().view(f)
     }
 }

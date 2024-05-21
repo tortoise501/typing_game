@@ -3,11 +3,13 @@ use ratatui::layout::{Constraint, Direction, Layout};
 
 use super::*;
 
+/// game component - responsible for game window behavior
 #[derive(Debug)]
 pub struct GameComp {
     pub(crate) game: Game,
 }
 impl Component for GameComp {
+    /// react to message and respond
     fn handle_message(&mut self, msg: Message) -> Message {
         let answer: Option<Message> = match msg {
             Message::KeyInput(key) => match key.code {
@@ -41,7 +43,7 @@ impl Component for GameComp {
             None => msg,
         }
     }
-
+    /// render window
     fn view(&mut self, f: &mut Frame) {
         match self.game.game_conf.mode {
             crate::game::GameMode::Normal => self.normal_view(f),
@@ -50,24 +52,25 @@ impl Component for GameComp {
     }
 }
 impl GameComp {
+    /// render normal view
     fn normal_view(&mut self, f: &mut Frame) {
         let write_field_rows = 3; //height of field where text is displayed //TODO: make it changeable in game settings
 
-        let matched_letter_vec = self.game.get_written_vec();
-
-        //how many letter to skip to allow wrapping //TODO: doesn't work well with wrapping, fix for wrapping (process words instead off letters?)
-        let text_width = (f.size().width - 5) as usize;
+        let matched_letter_vec = self.game.get_written_vec(); //vector of written characters
+        let text_width = (f.size().width - 5) as usize; //width of field where text is displayed
 
         let mut line: Vec<Span> = Vec::new();
         let mut text: Vec<Line> = Vec::new();
         let mut unfilled_started = false;
 
-        let mut letter_in_string_count = 0;
-        let mut word_cache: Vec<Span> = Vec::new();
+        let mut letter_in_line_count = 0;
+        let mut current_word: Vec<Span> = Vec::new(); //currently processed word, it will be added to the line and line will be added to the text
 
+        let mut character_count = 0;
         for letter in &matched_letter_vec {
+            character_count += 1;
             //creating Span representing one character colored in its state colors
-            word_cache.push(Span::styled(
+            current_word.push(Span::styled(
                 format!("{}", letter.c),
                 match letter.state {
                     FieldState::Unfilled if !unfilled_started => {
@@ -81,7 +84,7 @@ impl GameComp {
                             Style::new()
                                 .red()
                                 .underlined()
-                                .underline_color(ratatui::style::Color::Red)
+                                .underline_color(ratatui::style::Color::Red) //needed to correctly display incorrect space character
                         } else {
                             Style::new().red().not_underlined()
                         }
@@ -91,33 +94,35 @@ impl GameComp {
 
             //wrapping on new word
             if letter.c == ' ' {
-                if letter_in_string_count + word_cache.len() >= text_width {
-                    letter_in_string_count = 0;
+                //creating new line if the word cannot fit in previous line
+                if letter_in_line_count + current_word.len() >= text_width {
+                    letter_in_line_count = 0;
                     text.push(Line::from(line));
                     line = Vec::new();
 
-                    if !unfilled_started && write_field_rows / 2 < text.len() {
-                        //starts wrapping only after second word in new row for some reason//TODO: try to fix it
+                    //removing first line to show currently written line in the middle
+                    if !unfilled_started && write_field_rows / 2 < text.len() && text.len() > 1 {
+                        //starts wrapping only after first word in new row for some reason//TODO: try to fix it
                         text.remove(0);
                     }
                 }
-                letter_in_string_count += word_cache.len();
-                line.append(&mut word_cache);
+
+                //adding completed word to the line
+                letter_in_line_count += current_word.len();
+                line.append(&mut current_word);
+            }
+            if character_count + 1 == matched_letter_vec.len() {
+                line.append(&mut current_word);
+                text.push(Line::from(line.clone()));
             }
         }
-
-        //placing /n for custom wrapping
-
-        // let text: Line = Line::from(text);
-
-        let write_field_rows = write_field_rows as u16;
         //layout that divides screen on top, center and bottom rows
         let y_center_layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                Constraint::Length((f.size().height - (write_field_rows + 2)) / 2),
-                Constraint::Length(write_field_rows + 2),
-                Constraint::Length((f.size().height - (write_field_rows + 2)) / 2),
+                Constraint::Length((f.size().height - (write_field_rows as u16 + 2)) / 2),
+                Constraint::Length(write_field_rows as u16 + 2),
+                Constraint::Length((f.size().height - (write_field_rows as u16 + 2)) / 2),
             ])
             .split(f.size());
         //fully centered layout
@@ -140,6 +145,8 @@ impl GameComp {
             centered_layout[1],
         );
     }
+
+    ///render rewrite mode view
     fn rewrite_view(&mut self, f: &mut Frame) {
         let matched_letter_vec = self.game.get_written_vec();
 

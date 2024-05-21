@@ -7,12 +7,13 @@ use num_traits::{clamp_max, FromPrimitive};
 
 use super::*;
 use crate::game::{GameConf, GameMode, Limit};
-
+/// component responsible for configuration window
 #[derive(Debug)]
 pub struct GameConfigComp {
     pub game_conf: GameConf,
     pub option: SelectedOption,
 }
+///configuration option selected for input
 #[derive(Debug, PartialEq, FromPrimitive, Clone, Copy)]
 pub enum SelectedOption {
     Mode,
@@ -20,6 +21,7 @@ pub enum SelectedOption {
     Input,
 }
 impl SelectedOption {
+    ///select next option
     pub fn next(&mut self) {
         let i = *self as i32 + 1;
         *self = match FromPrimitive::from_i32(i) {
@@ -27,6 +29,7 @@ impl SelectedOption {
             None => SelectedOption::Mode,
         }
     }
+    ///select previous option
     pub fn prev(&mut self) {
         let i = *self as i32 - 1;
         *self = match FromPrimitive::from_i32(i) {
@@ -34,6 +37,7 @@ impl SelectedOption {
             None => SelectedOption::Input,
         }
     }
+    ///select next type of this option
     fn right(&mut self, conf: &mut GameConf) {
         match self {
             SelectedOption::Mode => {
@@ -52,6 +56,8 @@ impl SelectedOption {
             SelectedOption::Input => (),
         }
     }
+
+    ///select previous type of this option
     fn left(&mut self, conf: &mut GameConf) {
         match self {
             SelectedOption::Mode => {
@@ -75,6 +81,7 @@ impl SelectedOption {
 #[allow(unused_variables)]
 #[allow(dead_code)]
 impl Component for GameConfigComp {
+    /// react to message and answer
     fn handle_message(&mut self, msg: Message) -> Message {
         // let mut conf = &mut self.game_conf;
         let answer = match msg {
@@ -151,7 +158,7 @@ impl Component for GameConfigComp {
             None => msg,
         }
     }
-
+    /// render game configuration window
     fn view(&mut self, f: &mut Frame) {
         //Rendering border
         f.render_widget(Block::new().title("Border").borders(Borders::ALL), f.size());
