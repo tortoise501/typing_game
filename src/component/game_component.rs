@@ -1,3 +1,5 @@
+use std::time::{Duration, SystemTime, SystemTimeError};
+
 use crossterm::event::KeyModifiers;
 use ratatui::layout::{Constraint, Direction, Layout};
 
@@ -6,7 +8,9 @@ use super::*;
 /// game component - responsible for game window behavior
 #[derive(Debug)]
 pub struct GameComp {
-    pub(crate) game: Game,
+    pub game: Game,
+    pub last_stat_time: SystemTime,
+    pub stat_update_period: Duration,
 }
 impl Component for GameComp {
     /// react to message and respond
@@ -34,6 +38,15 @@ impl Component for GameComp {
                 if self.game.is_complete() {
                     return Message::StopGame;
                 };
+                if SystemTime::now()
+                    .duration_since(self.last_stat_time)
+                    .or::<SystemTimeError>(Ok(Duration::from_secs(0)))
+                    .unwrap()
+                    > self.stat_update_period
+                {
+                    self.last_stat_time = SystemTime::now();
+                    self.game.register_speed()
+                }
                 None
             }
             _ => None,
@@ -52,9 +65,21 @@ impl Component for GameComp {
     }
 }
 impl GameComp {
+    pub fn new(
+        mut game: Game,
+        last_stat_time: SystemTime,
+        stat_update_period: Duration,
+    ) -> GameComp {
+        game.statistics.intervals = stat_update_period.as_secs() as i32;
+        GameComp {
+            game,
+            last_stat_time,
+            stat_update_period,
+        }
+    }
     /// render normal view
     fn normal_view(&mut self, f: &mut Frame) {
-        let write_field_rows = 3; //height of field where text is displayed //TODO: make it changeable in game settings
+        let write_field_rows = 3; //height of field where text is displayed //TODO: make it configurable in game settings
 
         let matched_letter_vec = self.game.get_written_vec(); //vector of written characters
         let text_width = (f.size().width - 5) as usize; //width of field where text is displayed

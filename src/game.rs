@@ -78,19 +78,6 @@ impl Game {
         if c != ' ' {
             return; //checking if it is the end of potential word
         }
-        let correct_words = self.get_correct_words_count();
-        let track_interval = 5; //track every 5 words //TODO: make it customizable
-
-        if correct_words % track_interval == 0
-            && correct_words > self.statistics.speed_stat.len() as u32 * track_interval
-        {
-            let time_passed = SystemTime::now()
-                .duration_since(self.statistics.time_started.clone())
-                .expect("idk some error with time calculations");
-            self.statistics
-                .speed_stat
-                .push(GameStat::calculate_speed(correct_words, time_passed).round() as u32);
-        }
     }
 
     /// Returns true if length of written text is the same as length of correct text
@@ -109,6 +96,11 @@ impl Game {
             Limit::WordCount(count) => self.get_total_words_count() >= count, //?Possible problem if statistics are not updated, should update statistic after every input
             Limit::None => false,
         }
+    }
+
+    ///does everything needed to be done after the game ends
+    pub fn stop_game(&mut self) {
+        self.register_speed();
     }
 
     /// "Press" backspace for written text, deletes 1 correct stroke if letter is correct
@@ -156,6 +148,13 @@ impl Game {
         mr.generate_text(size as u32).unwrap() ////!TESTING
     }
 
+    ///Writes to speed stat vector
+    pub fn register_speed(&mut self) {
+        self.statistics
+            .speed_stat
+            .push(self.get_correct_words_count() - self.statistics.speed_stat.iter().sum::<u32>())
+    }
+
     /// Returns game statistics
     pub fn get_statistics(&mut self) -> GameStat {
         self.statistics = GameStat {
@@ -171,6 +170,7 @@ impl Game {
             total_words: self.get_total_words_count(),
             time_started: self.statistics.time_started.clone(),
             time_finished: SystemTime::now(),
+            intervals: 0,
         };
         self.statistics.clone()
     }
@@ -209,10 +209,12 @@ pub struct GameStat {
     pub wrong_strokes: u32,
     pub wrong_letters: u32,
     pub correct_words: u32,
+    ///first is vector second is interval
     pub speed_stat: Vec<u32>,
     pub total_words: u32,
     pub time_started: SystemTime,
     pub time_finished: SystemTime,
+    pub intervals: i32,
 }
 impl GameStat {
     pub fn new() -> GameStat {
@@ -225,13 +227,8 @@ impl GameStat {
             total_words: 0,
             time_started: SystemTime::now(),
             time_finished: SystemTime::now(),
+            intervals: 0,
         }
-    }
-
-    ///gets word count and duration to calculate speed in words per minute
-    pub fn calculate_speed(word_count: u32, delta_time: Duration) -> f32 {
-        let mins = delta_time.as_secs_f32() / 60.0;
-        word_count as f32 / mins
     }
 }
 
