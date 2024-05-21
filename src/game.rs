@@ -170,6 +170,7 @@ impl Game {
             total_words: self.get_total_words_count(),
             time_started: self.statistics.time_started.clone(),
             time_finished: SystemTime::now(),
+            intervals: 0,
         };
         self.statistics.clone()
     }
@@ -213,6 +214,7 @@ pub struct GameStat {
     pub total_words: u32,
     pub time_started: SystemTime,
     pub time_finished: SystemTime,
+    pub intervals: i32,
 }
 impl GameStat {
     pub fn new() -> GameStat {
@@ -225,6 +227,7 @@ impl GameStat {
             total_words: 0,
             time_started: SystemTime::now(),
             time_finished: SystemTime::now(),
+            intervals: 0,
         }
     }
 }

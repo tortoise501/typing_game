@@ -65,7 +65,12 @@ impl Component for GameComp {
     }
 }
 impl GameComp {
-    pub fn new(game: Game, last_stat_time: SystemTime, stat_update_period: Duration) -> GameComp {
+    pub fn new(
+        mut game: Game,
+        last_stat_time: SystemTime,
+        stat_update_period: Duration,
+    ) -> GameComp {
+        game.statistics.intervals = stat_update_period.as_secs() as i32;
         GameComp {
             game,
             last_stat_time,

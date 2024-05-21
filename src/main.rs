@@ -99,7 +99,7 @@ fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
             model.active_window = WindowType::Game(GameComp::new(
                 Game::new(1000, conf, None),
                 SystemTime::now(),
-                Duration::from_secs(5), //TODO: make it configurable with config file
+                Duration::from_secs(1), //TODO: make it configurable with config file
             ));
             None
         }
