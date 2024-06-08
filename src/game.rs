@@ -1,5 +1,7 @@
 use std::time::{Duration, SystemTime};
 
+use markov_rope::MarkovChain;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum GameMode {
     Normal,
@@ -37,17 +39,24 @@ pub struct Game {
 impl Game {
     pub fn new(size: usize, conf: GameConf, text: Option<String>) -> Game {
         Game {
-            correct_text: if let Some(t) = text {
-                t.chars().collect() //use text if given
-            } else {
-                let text;
+            correct_text: {
+                let text = if let Some(t) = text {
+                    t.clone()
+                }else{
+                    "".to_string()
+                };
+                let mr = if text.len() > 0{
+                    MarkovChain::from_string(&text)
+                }else{
+                    MarkovChain::default()
+                };
+                
                 if let Limit::WordCount(t) = conf.limit {
                     //generate new text if limit is word count
-                    text = Game::get_random_text((t + 1) as usize).chars().collect();
+                    mr.generate_text(t + 1).unwrap().chars().collect()//? dangerous unwrapping
                 } else {
-                    text = Game::get_random_text(size).chars().collect(); //generate new text if limit is time
+                    mr.generate_text(size as u32).unwrap().chars().collect() //? dangerous unwrapping
                 }
-                text
             },
 
             written_vec: Vec::new(),
@@ -142,11 +151,11 @@ impl Game {
     }
 
     ///Gets random text for a game
-    pub fn get_random_text(size: usize) -> String {
-        //crate::markov_gen::generate(size)
-        let mr = markov_rope::MarkovChain::default();
-        mr.generate_text(size as u32).unwrap() ////!TESTING
-    }
+    // pub fn get_random_text(size: usize) -> String {
+    //     //crate::markov_gen::generate(size)
+    //     let mr = markov_rope::MarkovChain::default();
+    //     mr.generate_text(size as u32).unwrap() ////!TESTING
+    // }
 
     ///Writes to speed stat vector
     pub fn register_speed(&mut self) {

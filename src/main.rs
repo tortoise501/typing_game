@@ -20,20 +20,24 @@ mod game;
 mod input;
 mod model;
 mod tui;
+mod config_manager;
 enum OutsideMessage {
     Message(Message),
     InputSignal(Option<InputSignal>),
 }
 fn main() -> Result<()> {
-    tui::install_panic_hook();
+    tui::install_panic_hook();//something to fix terminal if closed with Ctrl+C
     let mut terminal = tui::init_terminal()?;
+
+    let gen_text = config_manager::read_markov_text_file();
     let mut game_model = Model {
         active_window: WindowType::Menu(MenuComp::new()),
         running_state: model::RunningState::Running,
+        gen_text
     };
-    let tick_delay = Duration::from_millis(100);
-    let (tx_input, rx) = mpsc::channel();
-    let tx_tick = tx_input.clone();
+    let tick_delay = Duration::from_millis(100);//delay between every game logic calculation and render
+    let (tx_input, rx) = mpsc::channel();//create chanel to get input signals
+    let tx_tick = tx_input.clone();//crete sender for tick signals
     let _tick_thread = Box::new(thread::spawn(move || loop {
         thread::sleep(tick_delay);
         _ = tx_tick.send(OutsideMessage::Message(Message::Tick));
@@ -97,7 +101,7 @@ fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
     match answer {
         Message::StartGame(conf) => {
             model.active_window = WindowType::Game(GameComp::new(
-                Game::new(1000, conf, None),
+                Game::new(1000, conf, Some(model.gen_text.clone())),
                 SystemTime::now(),
                 Duration::from_secs(1), //TODO: make it configurable with config file
             ));
