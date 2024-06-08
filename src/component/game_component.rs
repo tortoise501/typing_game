@@ -160,7 +160,29 @@ impl GameComp {
             ])
             .split(y_center_layout[1]);
 
-        f.render_widget(Block::new().title("Border").borders(Borders::ALL), f.size());
+        //writing time/words left as border title
+
+        match self.game.game_conf.limit{
+            crate::game::Limit::Time(t) => {
+                let time_passed = SystemTime::now().duration_since(self.game.statistics.time_started);
+                if let Ok(val) = time_passed{
+                    let time_left =  (t - val).as_secs();
+                    f.render_widget(Block::new().title(format!("{}s",time_left)).borders(Borders::ALL), f.size());
+                }else{
+                    f.render_widget(Block::new().title("Border").borders(Borders::ALL), f.size());
+                }
+            },
+            crate::game::Limit::WordCount(c) => {
+                let words_left = c - self.game.get_total_words_count();
+                f.render_widget(Block::new().title(format!("{}/{}",words_left,c)).borders(Borders::ALL), f.size());
+
+            },
+            crate::game::Limit::None => {
+                f.render_widget(Block::new().title("Border").borders(Borders::ALL), f.size());
+            },
+        }
+
+
         f.render_widget(
             Paragraph::new(text)
                 .block(Block::new().borders(Borders::ALL))

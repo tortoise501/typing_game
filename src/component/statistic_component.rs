@@ -1,4 +1,3 @@
-use std::vec;
 
 use num_traits::Zero;
 use ratatui::{
@@ -90,7 +89,7 @@ impl Component for StatComp {
                 if stats.correct_strokes.is_zero() {
                     0
                 } else {
-                    stats.wrong_strokes / stats.correct_strokes
+                    100 - f32::round((stats.wrong_strokes as f32 / (stats.correct_strokes + stats.wrong_strokes) as f32) * 100_f32) as u32
                 }
             )),
             number_layout[2],
