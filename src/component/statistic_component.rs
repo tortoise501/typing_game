@@ -108,7 +108,7 @@ impl Component for StatComp {
                 //     color: Color::White,
                 // });
                 ctx.layer();
-                let mut speed_stat_scaled: Vec<u32> = Vec::new();
+                let mut speed_stat_scaled: Vec<i32> = Vec::new();
 
                 let block_width = width / stats.speed_stat.len() as f64;
                 //makes vector shorter if too many elements
@@ -128,7 +128,7 @@ impl Component for StatComp {
                         }
                     }
                 } else {
-                    speed_stat_scaled = stats.speed_stat.iter().map(|x| -> u32 { *x }).collect();
+                    speed_stat_scaled = stats.speed_stat.iter().map(|x| -> i32 { *x }).collect();
                 }
 
                 let len = speed_stat_scaled.len();

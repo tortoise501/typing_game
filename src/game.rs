@@ -161,7 +161,7 @@ impl Game {
     pub fn register_speed(&mut self) {
         self.statistics
             .speed_stat
-            .push(self.get_correct_words_count() - self.statistics.speed_stat.iter().sum::<u32>())
+            .push(self.get_correct_words_count() as i32 - self.statistics.speed_stat.iter().sum::<i32>())
     }
 
     /// Returns game statistics
@@ -219,7 +219,7 @@ pub struct GameStat {
     pub wrong_letters: u32,
     pub correct_words: u32,
     ///first is vector second is interval
-    pub speed_stat: Vec<u32>,
+    pub speed_stat: Vec<i32>,
     pub total_words: u32,
     pub time_started: SystemTime,
     pub time_finished: SystemTime,
