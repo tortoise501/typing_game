@@ -76,7 +76,7 @@ impl Game {
             self.statistics.correct_strokes += 1;
         } else {
             self.written_vec.push(Letter {
-                c: self.correct_text[self.written_vec.len()].clone(),
+                c,//?test for rewrite mode : self.correct_text[self.written_vec.len()].clone(),
                 state: FieldState::Wrong,
             });
             self.statistics.wrong_strokes += 1;
