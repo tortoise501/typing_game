@@ -1,10 +1,7 @@
 use crossterm::event::KeyEvent;
 use input::InputSignal;
 use std::{
-    io::Result,
-    sync::mpsc,
-    thread,
-    time::{Duration, SystemTime},
+    io::Result, sync::mpsc, thread, time::{Duration, SystemTime}
 };
 
 use ratatui::Frame;
@@ -28,7 +25,8 @@ enum OutsideMessage {
 fn main() -> Result<()> {
     tui::install_panic_hook();//something to fix terminal if closed with Ctrl+C
     let mut terminal = tui::init_terminal()?;
-
+    // tui::restore_terminal_new(&mut terminal);
+    // exit(0);
     let gen_text = config_manager::read_markov_text_file();
     let mut game_model = Model {
         active_window: WindowType::Menu(MenuComp::new()),
@@ -46,9 +44,10 @@ fn main() -> Result<()> {
         _ = tx_input.send(OutsideMessage::InputSignal(input::get_input_process_input()));
     });
 
-    while game_model.running_state == model::RunningState::Running {
+    'outer: while game_model.running_state == model::RunningState::Running {
         terminal.draw(|f| view(&mut game_model, f))?;
-
+        // tui::restore_terminal_new(&mut terminal);
+        // exit(0);
         // let input = input::get_input_process_input();
         let mut current_msg = match rx.recv() {
             //? Not Safe
@@ -58,7 +57,7 @@ fn main() -> Result<()> {
                     Some(s) => match s {
                         InputSignal::Key(key) => Some(Message::KeyInput(key)),
                         InputSignal::TerminateProgram => {
-                            tui::restore_terminal()?;
+                            let _ = tui::restore_terminal(&mut terminal);
                             panic!("TODO: better program termination")
                         }
                     },
@@ -75,9 +74,12 @@ fn main() -> Result<()> {
 
         while current_msg.is_some() {
             current_msg = update(&mut game_model, current_msg.unwrap());
+            if let Some(Message::Quit) = current_msg {
+                break 'outer
+            }
         }
     }
-    tui::restore_terminal()?;
+    let _ = tui::restore_terminal(&mut terminal);
     Ok(())
 }
 // #[allow(dead_code)]
@@ -115,8 +117,7 @@ fn process_answer(model: &mut Model, answer: Message) -> Option<Message> {
             _ => Message::GameStopped(None),
         }),
         Message::Quit => {
-            tui::restore_terminal().expect("TODO: panic message");
-            panic!("TODO: better program termination");
+            Some(Message::Quit)
         }
         Message::GameStopped(game) => match game {
             Some(game) => {

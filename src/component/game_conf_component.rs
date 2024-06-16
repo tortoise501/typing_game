@@ -3,7 +3,7 @@ use std::time::Duration;
 use ratatui::layout::{Constraint, Layout};
 
 use num_derive::FromPrimitive;
-use num_traits::{clamp_max, FromPrimitive};
+use num_traits::{clamp, FromPrimitive};
 
 use super::*;
 use crate::game::{GameConf, GameMode, Limit};
@@ -106,47 +106,70 @@ impl Component for GameConfigComp {
                 KeyCode::Backspace => {
                     match &mut self.game_conf.limit {
                         Limit::Time(t) => {
-                            *t = Duration::from_secs(t.as_secs() / 10);
+                            *t = Duration::from_secs(clamp(t.as_secs() / 10, 0, 600));
                             None
                         }
                         Limit::WordCount(wc) => {
-                            *wc = *wc / 10;
+                            *wc = clamp(*wc / 10,0,10000);
                             None
                         }
                         Limit::None => None, //TODO: path for custom file
                     }
                 }
                 KeyCode::Char(c) if self.option == SelectedOption::Input => {
-                    match &mut self.game_conf.limit {
-                        Limit::Time(t) => {
-                            if c.is_numeric() {
+                    if c.is_numeric(){
+                        match &mut self.game_conf.limit {
+                            Limit::Time(t) => {
                                 let mut sec = t.as_secs();
-                                if sec < 600 {
-                                    //600 seconds is time limit, crunch to avoid too big numbers
-                                    sec *= 10;
-                                    sec += c.to_digit(10).unwrap() as u64;
-                                    *t = Duration::from_secs(clamp_max(sec, 600))
-                                } else {
-                                    *t = Duration::from_secs(600)
-                                }
-                            }
-                            None
+                                //600 seconds is time limit, crunch to avoid too big numbers
+                                sec *= 10;
+                                sec += c.to_digit(10).unwrap() as u64;
+                                sec = clamp(sec, 1, 600);
+                                *t = Duration::from_secs(clamp(sec, 1, 600))
+                            },
+                            Limit::WordCount(wc) => {
+                                //10000 is max word count, crunch to avoid too big numbers
+                                let mut count = *wc * 10;
+                                count += c.to_digit(10).unwrap() as u32;
+                                *wc = clamp(count, 1,10000);
+                            },
+                            Limit::None => todo!(),
                         }
-                        Limit::WordCount(wc) => {
-                            if c.is_numeric() {
-                                if *wc < 10000 {
-                                    //10000 is max word count, crunch to avoid too big numbers
-                                    let mut count = *wc * 10;
-                                    count += c.to_digit(10).unwrap() as u32;
-                                    *wc = clamp_max(count, 10000);
-                                }
-                            }
-                            None
-                        }
-                        Limit::None => None, //TODO: path for custom file
+                        None
+                    }else{
+                        None
                     }
+
+                    // match &mut self.game_conf.limit {
+                    //     Limit::Time(t) => {
+                    //         if c.is_numeric() {
+                    //             let mut sec = t.as_secs();
+                    //             if sec < 600 {
+                    //                 //600 seconds is time limit, crunch to avoid too big numbers
+                    //                 sec *= 10;
+                    //                 sec += c.to_digit(10).unwrap() as u64;
+                    //                 *t = Duration::from_secs(clamp_max(sec, 600))
+                    //             } else {
+                    //                 *t = Duration::from_secs(600)
+                    //             }
+                    //         }
+                    //         None
+                    //     }
+                    //     Limit::WordCount(wc) => {
+                    //         if c.is_numeric() {
+                    //             if *wc < 10000 {
+                    //                 //10000 is max word count, crunch to avoid too big numbers
+                    //                 let mut count = *wc * 10;
+                    //                 count += c.to_digit(10).unwrap() as u32;
+                    //                 *wc = clamp_max(count, 10000);
+                    //             }
+                    //         }
+                    //         None
+                    //     }
+                    //     Limit::None => None, //TODO: path for custom file
+                    // }
                 }
-                KeyCode::Enter if self.option == SelectedOption::Input => {
+                KeyCode::Enter | KeyCode::Char(' ') => {
                     Some(Message::StartGame(self.game_conf.clone()))
                 }
                 _ => None,
@@ -161,7 +184,7 @@ impl Component for GameConfigComp {
     /// render game configuration window
     fn view(&mut self, f: &mut Frame) {
         //Rendering border
-        f.render_widget(Block::new().title("Border").borders(Borders::ALL), f.size());
+        f.render_widget(Block::new().title("Game configuration | Esc = go to menu | arrow buttons = navigation | Enter or Space = start the game").borders(Borders::ALL), f.size());
 
         // +--------------------------------+
         // |  rewrite  normal               |
@@ -182,20 +205,17 @@ impl Component for GameConfigComp {
             .constraints(Constraint::from_ratios([(1, 3), (1, 3), (1, 3)]))
             .split(content_layout[1]);
 
-        let mut render =
-            |text: &str, rect: &ratatui::layout::Rect, color: ratatui::style::Color| {
-                f.render_widget(Block::new().borders(Borders::ALL), *rect);
+        let render =
+            |text: &str, rect: &ratatui::layout::Rect, is_selected:bool,f: &mut Frame| {
+                 if is_selected {
+                    f.render_widget(Block::new().borders(Borders::ALL).style(Style::new().green()), *rect);
+                } 
                 let box_top_padding = (rect.height as f32 / 2 as f32).round() as u16 - 1;
                 let rect = Layout::default()
                     .direction(ratatui::layout::Direction::Vertical)
                     .constraints(Constraint::from_lengths([box_top_padding, 1]))
                     .split(*rect)[1];
-                let style = if color == ratatui::style::Color::Black {
-                    Style::new().on_black().white()
-                } else {
-                    Style::new().black().bg(color)
-                };
-                let text = Span::raw(text).style(style);
+                let text = Span::raw(text).style(Style::new().on_black().white());
                 f.render_widget(Paragraph::new(text).alignment(Alignment::Center), rect);
             };
 
@@ -219,33 +239,45 @@ impl Component for GameConfigComp {
             render(
                 "normal",
                 &mode_selector_layout[0],
-                ratatui::style::Color::Black,
+                false,f
             );
             render(
                 "rewrite",
                 &mode_selector_layout[1],
-                ratatui::style::Color::Black,
-            );
+                false,f            );
             render(
                 "time",
                 &limit_selector_layout[0],
-                ratatui::style::Color::Black,
-            );
+                false,f            );
             render(
                 "word count",
                 &limit_selector_layout[1],
-                ratatui::style::Color::Black,
-            );
+                false,f            );
             render(
                 "custom text",
                 &limit_selector_layout[2],
-                ratatui::style::Color::Black,
-            );
+                false,f            );
             render(
                 input_text.as_str(),
                 &limit_input_layout[0],
-                ratatui::style::Color::Black,
-            );
+                false,f            );
+        }
+
+
+
+        match &self.option {
+            SelectedOption::Mode => {
+                f.render_widget(Block::new().borders(Borders::ALL).style(Style::new().white()), selectors_layout[0]);
+
+            },
+            SelectedOption::Limit => {
+                f.render_widget(Block::new().borders(Borders::ALL).style(Style::new().white()), selectors_layout[1]);
+
+            },
+            SelectedOption::Input => {
+                f.render_widget(Block::new().borders(Borders::ALL).style(Style::new().white()), selectors_layout[2]);
+
+            }
         }
 
         //rendering set settings for limits
@@ -253,67 +285,30 @@ impl Component for GameConfigComp {
             Limit::Time(_) => render(
                 "time",
                 &limit_selector_layout[0],
-                ratatui::style::Color::Green,
+                true,f 
             ),
             Limit::WordCount(_) => render(
                 "word count",
                 &limit_selector_layout[1],
-                ratatui::style::Color::Green,
+                true,f            
             ),
             Limit::None => render(
                 "custom text",
                 &limit_selector_layout[2],
-                ratatui::style::Color::Green,
+                true,f            
             ),
         }
-        //rendering set settings for mode   ratatui::style::Color::Black
+        //rendering set settings for mode
         match self.game_conf.mode {
             GameMode::Normal => render(
                 "normal",
                 &mode_selector_layout[0],
-                ratatui::style::Color::Green,
+                true,f            
             ),
             GameMode::Rewrite => render(
                 "rewrite",
                 &mode_selector_layout[1],
-                ratatui::style::Color::Green,
-            ),
-        }
-
-        match &self.option {
-            SelectedOption::Mode => match self.game_conf.mode {
-                GameMode::Normal => render(
-                    "normal",
-                    &mode_selector_layout[0],
-                    ratatui::style::Color::White,
-                ),
-                GameMode::Rewrite => render(
-                    "rewrite",
-                    &mode_selector_layout[1],
-                    ratatui::style::Color::White,
-                ),
-            },
-            SelectedOption::Limit => match self.game_conf.limit {
-                Limit::Time(_) => render(
-                    "time",
-                    &limit_selector_layout[0],
-                    ratatui::style::Color::White,
-                ),
-                Limit::WordCount(_) => render(
-                    "word count",
-                    &limit_selector_layout[1],
-                    ratatui::style::Color::White,
-                ),
-                Limit::None => render(
-                    "custom text",
-                    &limit_selector_layout[2],
-                    ratatui::style::Color::White,
-                ),
-            },
-            SelectedOption::Input => render(
-                input_text.as_str(),
-                &limit_input_layout[0],
-                ratatui::style::Color::White,
+                true,f            
             ),
         }
     }

@@ -77,7 +77,7 @@ impl Component for MenuComp {
     fn view(&mut self, f: &mut Frame) {
         let lines = vec![
             Line::from(Span::styled(
-                "Start rewrite",
+                "Start game",
                 if self.current_opt == MenuOptions::GameConf {
                     Style::new().black().on_white()
                 } else {
@@ -97,7 +97,7 @@ impl Component for MenuComp {
             Paragraph::new(lines)
                 .block(
                     Block::new()
-                        .title("Menu")
+                        .title("Menu | arrow buttons = navigation | Space or Enter = Select option")
                         .borders(Borders::ALL)
                         .padding(Padding::vertical(3)),
                 )

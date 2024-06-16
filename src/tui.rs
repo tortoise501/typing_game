@@ -6,24 +6,25 @@ use crossterm::{
 };
 use ratatui::prelude::*;
 use std::io::Result;
-use std::{io::stdout, panic};
+use std::{io::{stdout,Stdout}, panic};
 
-pub fn init_terminal() -> Result<Terminal<impl Backend>> {
+pub fn init_terminal() -> Result<Terminal<CrosstermBackend<Stdout>>> {
     enable_raw_mode()?;
     execute!(
         stdout(),
         EnterAlternateScreen,
-        SetCursorStyle::BlinkingBar,
+        SetCursorStyle::DefaultUserShape,
         MoveTo(3, 3)
     )?;
     let terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
+    
     Ok(terminal)
 }
 
-pub fn restore_terminal() -> Result<()> {
-    stdout().execute(LeaveAlternateScreen)?;
+pub fn restore_terminal(terminal: &mut Terminal<CrosstermBackend<Stdout>>) -> Result<()> {
     disable_raw_mode()?;
-    Ok(())
+    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+    terminal.show_cursor()
 }
 
 pub fn install_panic_hook() {
