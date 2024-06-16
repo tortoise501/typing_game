@@ -92,11 +92,11 @@ impl GameComp {
         let mut current_word: Vec<Span> = Vec::new(); //currently processed word, it will be added to the line and line will be added to the text
 
         let mut character_count = 0;
-        for letter in &matched_letter_vec {
+        for (i,letter) in matched_letter_vec.iter().enumerate() {
             character_count += 1;
             //creating Span representing one character colored in its state colors
             current_word.push(Span::styled(
-                format!("{}", letter.c),
+                format!("{}", self.game.correct_text[i]),
                 match letter.state {
                     FieldState::Unfilled if !unfilled_started => {
                         unfilled_started = true;
