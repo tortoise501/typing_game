@@ -37,7 +37,7 @@ pub struct Game {
     pub game_conf: GameConf,
 }
 impl Game {
-    pub fn new(size: usize, conf: GameConf, text: Option<String>) -> Game {
+    pub fn new(size: usize, mut conf: GameConf, text: Option<String>) -> Game {
         Game {
             correct_text: {
                 let text = if let Some(t) = text {
@@ -50,12 +50,20 @@ impl Game {
                 }else{
                     MarkovChain::default()
                 };
-                
-                if let Limit::WordCount(t) = conf.limit {
-                    //generate new text if limit is word count
-                    mr.generate_text(t + 1).unwrap().chars().collect()//? dangerous unwrapping
-                } else {
-                    mr.generate_text(size as u32).unwrap().chars().collect() //? dangerous unwrapping
+
+                match conf.limit {
+                    Limit::Time(t) => {
+                        if t.as_secs() == 0 {
+                            conf.limit = Limit::Time(Duration::from_secs(1));//change 0 sec to 1 sec to avoid crashing on game creation
+                        }
+                        mr.generate_text(size as u32).unwrap().chars().collect()//? dangerous unwrapping
+
+                    },
+                    Limit::WordCount(wc) => {
+                        mr.generate_text(wc + 1).unwrap().chars().collect()//? dangerous unwrapping
+
+                    },
+                    Limit::None => todo!(),
                 }
             },
 

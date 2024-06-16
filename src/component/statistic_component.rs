@@ -3,7 +3,7 @@ use num_traits::Zero;
 use ratatui::{
     layout::{Constraint, Layout},
     style::Color,
-    widgets::canvas::{Canvas, Map, MapResolution, Rectangle},
+    widgets::canvas::{Canvas, Rectangle},
 };
 
 use crate::game::GameStat;
@@ -22,8 +22,7 @@ impl Component for StatComp {
     fn handle_message(&mut self, msg: Message) -> Message {
         let answer = match msg {
             Message::KeyInput(key) => match key.code {
-                KeyCode::Esc => Some(Message::Quit),
-                KeyCode::Enter => Some(Message::GoToWindow(WindowType::Menu(MenuComp::new()))),
+                KeyCode::Esc => Some(Message::GoToWindow(WindowType::Menu(MenuComp::new()))),
                 _ => None,
             },
             _ => None,
@@ -36,12 +35,13 @@ impl Component for StatComp {
 
     fn view(&mut self, f: &mut Frame) {
         // let stats = &self.game.get_statistics();
-        let mut stats = if let Some(stats) = &self.statistics {
+        let stats = if let Some(stats) = &self.statistics {
             stats.clone()
         } else {
             self.statistics = Some(self.game.get_statistics());
             self.game.get_statistics()
         };
+        f.render_widget(Block::bordered().title("Statistics | Esc = got to menu"), f.size());
         let zones_layout = Layout::default()
             .direction(ratatui::layout::Direction::Vertical)
             .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
